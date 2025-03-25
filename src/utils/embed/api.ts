@@ -1,13 +1,13 @@
 
-import { createMessageElement, hideTypingIndicator } from './dom';
+import { hideTypingIndicator } from './dom';
 
 /**
- * Call the webhook API with the user's message
+ * Call the webhook with the user's message
  */
 export const callWebhook = (
-  message: string, 
-  webhookUrl: string, 
-  chatMessages: any[], 
+  message: string,
+  webhookUrl: string,
+  chatMessages: any[],
   threadId: string,
   callbacks: {
     onStart: () => void;
@@ -21,14 +21,18 @@ export const callWebhook = (
   // Create a timeout for the request
   const timeoutId = setTimeout(() => {
     hideTypingIndicator();
-    callbacks.onError();
     callbacks.onComplete();
     
     const messagesContainer = document.querySelector('.chat-widget-messages');
     if (messagesContainer) {
-      const errorMessage = createMessageElement('agent', 'Sorry, the request timed out. Please try again later.');
-      messagesContainer.appendChild(errorMessage);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      const errorMessageObj = {
+        id: 'err_' + Date.now(),
+        text: 'Sorry, the request timed out. Please try again later.',
+        sender: 'agent',
+        timestamp: Date.now()
+      };
+      
+      callbacks.onSuccess([errorMessageObj]);
     }
   }, 30000); // 30-second timeout
   
@@ -73,15 +77,16 @@ export const callWebhook = (
     console.error('Error calling webhook:', error);
     
     clearTimeout(timeoutId);
-    // Add error message to UI
     hideTypingIndicator();
-    const messagesContainer = document.querySelector('.chat-widget-messages');
-    if (messagesContainer) {
-      const errorMessage = createMessageElement('agent', 'Sorry, an error occurred. Please try again later.');
-      messagesContainer.appendChild(errorMessage);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
     
+    const errorMessageObj = {
+      id: 'err_' + Date.now(),
+      text: 'Sorry, an error occurred. Please try again later.',
+      sender: 'agent',
+      timestamp: Date.now()
+    };
+    
+    callbacks.onSuccess([errorMessageObj]);
     callbacks.onError();
   })
   .finally(() => {
