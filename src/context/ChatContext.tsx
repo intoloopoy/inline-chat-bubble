@@ -70,18 +70,36 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   }, []);
 
   // Helper function to ensure timestamp is a number
-  const normalizeTimestamp = (timestamp: string | number): number => {
+  const normalizeTimestamp = (timestamp: string | number | undefined): number => {
     if (typeof timestamp === 'number') {
       return timestamp;
     }
     
-    // Try to parse the timestamp as a Date
-    try {
-      return new Date(timestamp).getTime();
-    } catch (e) {
-      console.error("Failed to parse timestamp:", timestamp);
-      return Date.now(); // Fallback to current time if parsing fails
+    if (!timestamp) {
+      return Date.now(); // If no timestamp provided, use current time
     }
+    
+    // Handle malformed timestamp strings by removing extra quotes
+    if (typeof timestamp === 'string') {
+      // Remove any extra quotes that might be in the string
+      const cleanTimestamp = timestamp.replace(/^["'](.*)["']$/, '$1');
+      
+      // Try to parse the timestamp as a number first
+      const parsed = parseInt(cleanTimestamp, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+      
+      // Try to parse as date if it's not a simple number
+      try {
+        return new Date(cleanTimestamp).getTime();
+      } catch (e) {
+        console.error("Failed to parse timestamp:", timestamp);
+        return Date.now(); // Fallback to current time if parsing fails
+      }
+    }
+    
+    return Date.now(); // Final fallback
   };
 
   // Send a message to the webhook
@@ -123,11 +141,23 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           throw new Error(`Webhook request failed with status ${response.status}`);
         }
 
-        const data: WebhookResponse = await response.json();
+        // Get the response body as text first
+        const responseText = await response.text();
+        
+        // Try to parse the JSON
+        let data: WebhookResponse;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("Failed to parse webhook response:", responseText);
+          throw new Error("Invalid JSON response from webhook");
+        }
 
         if (data.status === "error") {
           throw new Error(data.error || "Unknown error from webhook");
         }
+
+        console.log("Webhook response:", data);
 
         // Update messages with the response from the webhook
         setMessages((prev) => {
@@ -144,6 +174,12 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           const newMessages = processedMessages.filter(
             (msg) => !prev.some((prevMsg) => prevMsg.id === msg.id)
           );
+          
+          if (newMessages.length === 0) {
+            console.warn("No new messages received from webhook");
+          } else {
+            console.log("New messages added:", newMessages);
+          }
           
           return [...prev, ...newMessages];
         });
