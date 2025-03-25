@@ -4,6 +4,7 @@ export interface Message {
   text: string;
   sender: "user" | "agent";
   timestamp: number;
+  thread_id?: string; // Added to accommodate webhook responses that include thread_id
 }
 
 export interface WebhookResponse {

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Message, WebhookResponse } from "@/types/chat";
 import { v4 as uuidv4 } from "uuid";
@@ -107,7 +106,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     // Create a properly formatted message
     return {
       id: msg.id || uuidv4(), // Ensure there's an ID
-      text: msg.text || "",
+      text: msg.text?.replace(/[""]/g, '"') || "", // Replace curly quotes with straight quotes
       sender: msg.sender || "agent",
       timestamp: normalizeTimestamp(msg.timestamp) // Normalize timestamp
     };
@@ -183,7 +182,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           data = JSON.parse(responseText);
         } catch (parseError) {
           console.error("Failed to parse webhook response:", responseText);
-          throw new Error("Invalid JSON response from webhook");
+          // Attempt to sanitize the response by replacing curly quotes
+          try {
+            const sanitizedText = responseText.replace(/[""]/g, '"');
+            data = JSON.parse(sanitizedText);
+            console.log("Successfully parsed sanitized response:", data);
+          } catch (secondError) {
+            throw new Error("Invalid JSON response from webhook even after sanitizing");
+          }
         }
 
         if (data.status === "error") {
