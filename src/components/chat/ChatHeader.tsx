@@ -2,7 +2,7 @@
 import React from "react";
 import { useChatContext } from "@/context/ChatContext";
 import { Button } from "@/components/ui/button";
-import { X, Minimize2, Settings } from "lucide-react";
+import { X, Minimize2, Settings, Maximize2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,15 @@ import { Label } from "@/components/ui/label";
 interface ChatHeaderProps {
   title?: string;
   showClose?: boolean;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ 
   title = "Chat",
-  showClose = true
+  showClose = true,
+  isFullscreen = false,
+  onToggleFullscreen
 }) => {
   const { toggleChat, webhookUrl, setWebhookUrl, resetChat } = useChatContext();
 
@@ -56,6 +60,18 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             </div>
           </PopoverContent>
         </Popover>
+        
+        {onToggleFullscreen && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onToggleFullscreen} 
+            className="h-8 w-8 text-primary-foreground hover:bg-primary/90"
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            <span className="sr-only">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
+          </Button>
+        )}
         
         {showClose && (
           <>

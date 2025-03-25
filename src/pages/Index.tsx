@@ -111,7 +111,7 @@ const Index = () => {
                   />
                 </div>
                 
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-1">
                   <div className="p-4 border rounded-lg bg-muted/10">
                     <h3 className="text-lg font-medium mb-3">Article Content</h3>
                     <p className="mb-3">
@@ -127,12 +127,12 @@ const Index = () => {
                     <Chat 
                       isInline={true} 
                       width="100%" 
-                      height="300px"
+                      height="500px"
                       title="Support Chat"
                     />
                   </ChatProvider>
                   
-                  <div className="md:col-span-2 p-4 border rounded-lg bg-muted/10 mt-4">
+                  <div className="p-4 border rounded-lg bg-muted/10 mt-4">
                     <h3 className="text-lg font-medium mb-3">More Content After Chat</h3>
                     <p>
                       You can place additional content below the chat to create a seamless experience
