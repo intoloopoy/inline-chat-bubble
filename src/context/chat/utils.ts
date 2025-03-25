@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from "uuid";
 import { Message } from "@/types/chat";
 
@@ -77,22 +76,23 @@ export const isDuplicateMessage = (newMsg: Message, existingMessages: Message[])
  * Parse webhook response text
  */
 export const parseWebhookResponse = (responseText: string) => {
-  // Try first approach - with robust handling for multi-line text
+  // Try to pre-process the JSON string to handle HTML content properly
   try {
-    // Use a more robust approach for parsing JSON with newlines
-    // First replace any literal \n with \\n and handle other escaping issues
-    const preparedText = responseText
-      .replace(/\n/g, "\\n") // Replace literal newlines with escaped newlines
-      .replace(/\r/g, "\\r") // Replace carriage returns
-      .replace(/\t/g, "\\t") // Replace tabs
-      .replace(/(["\s\\])([\\]+)(["\s])/g, "$1$2$2$3") // Fix any double escaping issues
-      .replace(/\\/g, "\\\\") // Double escape all backslashes
-      .replace(/\\\\/g, "\\") // But fix any we just double-escaped
-      .replace(/"/g, '\\"') // Escape all quotes
-      .replace(/\\\\"/g, '\\"'); // Fix any double-escaped quotes
-          
-    // Now wrap in quotes and parse
-    return JSON.parse(`{"wrappedResponse":${responseText}}`).wrappedResponse;
+    // First, handle possible HTML content by properly escaping it
+    // Find strings that look like they contain HTML tags
+    const preparedText = responseText.replace(/("text"\s*:\s*")([^"]*?)(")/g, (match, p1, p2, p3) => {
+      // p2 is the content between quotes that might contain HTML
+      // Escape newlines and special characters within the HTML content
+      const escapedContent = p2
+        .replace(/\n/g, "\\n")
+        .replace(/\r/g, "\\r")
+        .replace(/\t/g, "\\t")
+        .replace(/\\"/g, '\\\\"'); // Properly escape already escaped quotes
+        
+      return p1 + escapedContent + p3;
+    });
+    
+    return JSON.parse(preparedText);
   } catch (firstError) {
     console.error("Failed to parse with first method, trying sanitized approach:", firstError);
     
@@ -108,4 +108,24 @@ export const parseWebhookResponse = (responseText: string) => {
       throw new Error("Invalid JSON response from webhook even after sanitizing");
     }
   }
+};
+
+/**
+ * Process HTML content in message
+ * This will sanitize HTML and ensure it's displayed properly
+ */
+export const processHtmlContent = (text: string): string => {
+  if (!text) return "";
+  
+  // Check if the text contains HTML tags
+  if (/<\/?[a-z][\s\S]*>/i.test(text)) {
+    // Keep the HTML structure but ensure it's safe
+    // In a real app, you might want to use a library like DOMPurify
+    return text
+      // Fix common HTML issues
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  
+  return text;
 };

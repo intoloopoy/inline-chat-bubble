@@ -3,6 +3,7 @@ import React from "react";
 import { Message } from "@/types/chat";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { processHtmlContent } from "@/context/chat/utils";
 
 interface MessageBubbleProps {
   message: Message;
@@ -10,6 +11,7 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.sender === "user";
+  const messageText = processHtmlContent(message.text);
   
   return (
     <div
@@ -24,7 +26,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         )}
       >
         <div className="flex flex-col">
-          <span className="text-sm">{message.text}</span>
+          {isUser ? (
+            <span className="text-sm">{messageText}</span>
+          ) : (
+            <div 
+              className="text-sm"
+              dangerouslySetInnerHTML={{ __html: messageText }} 
+            />
+          )}
           <span className={cn(
             "text-xs mt-1",
             isUser ? "text-blue-100" : "text-gray-500"
