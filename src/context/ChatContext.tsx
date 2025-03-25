@@ -214,18 +214,35 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
           throw new Error("Empty response from webhook");
         }
         
-        // Try to parse the JSON
+        // Try to parse the JSON with safer handling for multi-line text
         let data: WebhookResponse;
         try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("Failed to parse webhook response:", responseText);
-          // Attempt to sanitize the response by replacing curly quotes
+          // Use a more robust approach for parsing JSON with newlines
+          // First replace any literal \n with \\n and handle other escaping issues
+          const preparedText = responseText
+            .replace(/\n/g, "\\n") // Replace literal newlines with escaped newlines
+            .replace(/\r/g, "\\r") // Replace carriage returns
+            .replace(/\t/g, "\\t") // Replace tabs
+            .replace(/(["\s\\])([\\]+)(["\s])/g, "$1$2$2$3") // Fix any double escaping issues
+            .replace(/\\/g, "\\\\") // Double escape all backslashes
+            .replace(/\\\\/g, "\\") // But fix any we just double-escaped
+            .replace(/"/g, '\\"') // Escape all quotes
+            .replace(/\\\\"/g, '\\"'); // Fix any double-escaped quotes
+            
+          // Now wrap in quotes and parse
+          data = JSON.parse(`{"wrappedResponse":${responseText}}`).wrappedResponse;
+        } catch (firstError) {
+          console.error("Failed to parse with first method, trying sanitized approach:", firstError);
           try {
-            const sanitizedText = responseText.replace(/[""]/g, '"');
+            // Try to sanitize the response by replacing known problematic characters
+            const sanitizedText = responseText
+              .replace(/[""]/g, '"') // Replace curly quotes with straight quotes
+              .replace(/[\u0000-\u0019]+/g, " "); // Replace control characters with spaces
+                  
             data = JSON.parse(sanitizedText);
             console.log("Successfully parsed sanitized response:", data);
           } catch (secondError) {
+            console.error("Failed to parse webhook response even after sanitizing:", secondError);
             throw new Error("Invalid JSON response from webhook even after sanitizing");
           }
         }
