@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Message, WebhookResponse } from "@/types/chat";
 import { v4 as uuidv4 } from "uuid";
@@ -39,10 +40,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl);
+  const [threadId, setThreadId] = useState<string | undefined>(undefined);
 
-  // Load messages from localStorage on component mount
+  // Load messages and threadId from localStorage on component mount
   useEffect(() => {
     const storedMessages = localStorage.getItem("chatMessages");
+    const storedThreadId = localStorage.getItem("chatThreadId");
+    
     if (storedMessages) {
       try {
         setMessages(JSON.parse(storedMessages));
@@ -50,22 +54,35 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         console.error("Failed to parse stored messages:", error);
       }
     }
+    
+    if (storedThreadId) {
+      setThreadId(storedThreadId);
+    }
   }, []);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("chatMessages", JSON.stringify(messages));
   }, [messages]);
+  
+  // Save threadId to localStorage whenever it changes
+  useEffect(() => {
+    if (threadId) {
+      localStorage.setItem("chatThreadId", threadId);
+    }
+  }, [threadId]);
 
   // Toggle the chat open/closed state
   const toggleChat = useCallback(() => {
     setIsOpen((prev) => !prev);
   }, []);
 
-  // Reset the chat messages
+  // Reset the chat messages and thread ID
   const resetChat = useCallback(() => {
     setMessages([]);
+    setThreadId(undefined);
     localStorage.removeItem("chatMessages");
+    localStorage.removeItem("chatThreadId");
   }, []);
 
   // Helper function to ensure timestamp is a number
@@ -104,12 +121,19 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   // Process a single message to ensure it has the correct format
   const processMessage = (msg: any): Message => {
     // Create a properly formatted message
-    return {
+    const processedMessage: Message = {
       id: msg.id || uuidv4(), // Ensure there's an ID
       text: msg.text?.replace(/[""]/g, '"') || "", // Replace curly quotes with straight quotes
       sender: msg.sender || "agent",
       timestamp: normalizeTimestamp(msg.timestamp) // Normalize timestamp
     };
+    
+    // Add thread_id if it exists in the message
+    if (msg.thread_id) {
+      processedMessage.thread_id = msg.thread_id;
+    }
+    
+    return processedMessage;
   };
 
   // Check if a message is a duplicate
@@ -149,17 +173,23 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
       setIsLoading(true);
 
       try {
-        // Send the message to the webhook
+        // Create the request payload, including thread_id if available
+        const payload = {
+          message: text,
+          messages: messages,
+          ...(threadId && { thread_id: threadId }) // Add thread_id if it exists
+        };
+        
         console.log("Sending message to webhook:", webhookUrl);
+        console.log("Payload including thread_id:", payload);
+        
+        // Send the message to the webhook
         const response = await fetch(webhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            message: text,
-            messages: messages,
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
@@ -218,6 +248,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
             console.log(`Adding ${newMessages.length} new messages:`, newMessages);
           }
           
+          // Check for thread_id in the new messages and update state if found
+          const firstMessageWithThreadId = newMessages.find(msg => msg.thread_id);
+          if (firstMessageWithThreadId?.thread_id && firstMessageWithThreadId.thread_id !== threadId) {
+            console.log("Found new thread_id:", firstMessageWithThreadId.thread_id);
+            setThreadId(firstMessageWithThreadId.thread_id);
+          }
+          
           return [...prev, ...newMessages];
         });
       } catch (error) {
@@ -227,7 +264,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         setIsLoading(false);
       }
     },
-    [messages, webhookUrl]
+    [messages, webhookUrl, threadId]
   );
 
   return (
