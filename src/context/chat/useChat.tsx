@@ -88,7 +88,7 @@ export const useChat = (initialWebhookUrl: string = ""): ChatContextProps => {
         
         // Send the message to the webhook with a timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 45000); // Increased to 45 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // Increased to 60 second timeout
         
         const response = await fetch(webhookUrl, {
           method: "POST",
