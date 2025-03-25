@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -76,15 +75,14 @@ export const useChat = (initialWebhookUrl: string = ""): ChatContextProps => {
       setIsLoading(true);
 
       try {
-        // Create the request payload, including thread_id if available
+        // Create the request payload with only the current message and thread_id if available
         const payload = {
           message: text,
-          messages: messages,
           ...(threadId && { thread_id: threadId }) // Add thread_id if it exists
         };
         
         console.log("Sending message to webhook:", webhookUrl);
-        console.log("Payload including thread_id:", payload);
+        console.log("Payload:", payload);
         
         // Send the message to the webhook with a timeout
         const controller = new AbortController();
@@ -184,7 +182,7 @@ export const useChat = (initialWebhookUrl: string = ""): ChatContextProps => {
         setIsLoading(false);
       }
     },
-    [messages, webhookUrl, threadId]
+    [webhookUrl, threadId]
   );
 
   return {
