@@ -18,8 +18,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   initialWebhookUrl = "",
   initialChatTitle = "Support Chat",
   initialInputPlaceholder = "Type a message...",
+  initialEmptyStateText = "Send a message to start chatting",
 }) => {
-  const chatContext = useChat(initialWebhookUrl, initialChatTitle, initialInputPlaceholder);
+  const chatContext = useChat(
+    initialWebhookUrl,
+    initialChatTitle,
+    initialInputPlaceholder,
+    initialEmptyStateText
+  );
 
   return (
     <ChatContext.Provider value={chatContext}>

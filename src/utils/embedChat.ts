@@ -1,3 +1,4 @@
+
 export const generateEmbedScript = (
   webhookUrl: string, 
   options: {
@@ -8,6 +9,7 @@ export const generateEmbedScript = (
     height?: string;
     chatTitle?: string;
     inputPlaceholder?: string;
+    emptyStateText?: string;
   }
 ) => {
   const positionClass = options.position || 'bottom-right';
@@ -17,6 +19,7 @@ export const generateEmbedScript = (
   const height = options.height || '500px';
   const chatTitle = options.chatTitle || 'Support Chat';
   const inputPlaceholder = options.inputPlaceholder || 'Type a message...';
+  const emptyStateText = options.emptyStateText || 'Send a message to start chatting';
   
   return `<script src="https://cdn.jsdelivr.net/npm/@your-chat-library/embed@latest"></script>
 <script>
@@ -29,7 +32,8 @@ export const generateEmbedScript = (
       ${isInline ? `width: "${width}",` : ''}
       ${isInline ? `height: "${height}",` : ''}
       chatTitle: "${chatTitle}",
-      inputPlaceholder: "${inputPlaceholder}"
+      inputPlaceholder: "${inputPlaceholder}",
+      emptyStateText: "${emptyStateText}"
     });
   });
 </script>`;
