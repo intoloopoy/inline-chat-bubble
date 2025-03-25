@@ -183,17 +183,25 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         console.log("Sending message to webhook:", webhookUrl);
         console.log("Payload including thread_id:", payload);
         
-        // Send the message to the webhook
+        // Send the message to the webhook with a timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const response = await fetch(webhookUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload),
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
 
         if (!response.ok) {
-          throw new Error(`Webhook request failed with status ${response.status}`);
+          const errorText = await response.text();
+          console.error(`Webhook error (${response.status}):`, errorText);
+          throw new Error(`Webhook request failed with status ${response.status}: ${errorText}`);
         }
 
         // Get the response body as text first
@@ -259,7 +267,29 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
         });
       } catch (error) {
         console.error("Error sending message to webhook:", error);
-        toast.error("Failed to send message. Please try again.");
+        
+        // Provide more specific error messages based on the error type
+        if (error instanceof TypeError && error.message.includes("NetworkError")) {
+          toast.error("Network error. Please check your internet connection.");
+        } else if (error instanceof DOMException && error.name === "AbortError") {
+          toast.error("Request timed out. The webhook server took too long to respond.");
+        } else if (error instanceof Error && error.message.includes("status 500")) {
+          toast.error("The webhook server encountered an error. Please try again later or contact support.");
+        } else if (error instanceof Error && error.message.includes("status 429")) {
+          toast.error("Too many requests. Please wait a moment before trying again.");
+        } else {
+          toast.error(`Failed to send message: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+        
+        // Add a system message to inform the user about the error
+        const errorMessage: Message = {
+          id: uuidv4(),
+          text: "Sorry, I couldn't process your message. Please try again or check the webhook URL.",
+          sender: "agent",
+          timestamp: Date.now(),
+        };
+        
+        setMessages(prev => [...prev, errorMessage]);
       } finally {
         setIsLoading(false);
       }
