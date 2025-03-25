@@ -1,3 +1,4 @@
+
 export const generateEmbedScript = (
   webhookUrl: string, 
   options: {
@@ -24,19 +25,32 @@ export const generateEmbedScript = (
 (function() {
   // Initialize the chat widget
   document.addEventListener('DOMContentLoaded', function() {
+    // Define configuration options
+    const config = {
+      isInline: ${isInline},
+      positionClass: "${positionClass}",
+      targetSelector: "${targetSelector}",
+      width: "${width}",
+      height: "${height}",
+      chatTitle: "${chatTitle}",
+      inputPlaceholder: "${inputPlaceholder}",
+      emptyStateText: "${emptyStateText}",
+      webhookUrl: "${webhookUrl}"
+    };
+    
     // Create stylesheet
     const style = document.createElement('style');
     style.innerHTML = \`
       .chat-widget-container {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        \${!isInline ? \`
+        \${!config.isInline ? \`
           position: fixed;
-          \${positionClass.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
-          \${positionClass.includes('right') ? 'right: 20px;' : 'left: 20px;'}
+          \${config.positionClass.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
+          \${config.positionClass.includes('right') ? 'right: 20px;' : 'left: 20px;'}
           z-index: 9999;
           \` : \`
-          width: \${width};
-          height: \${height};
+          width: \${config.width};
+          height: \${config.height};
           \`}
       }
       .chat-widget-button {
@@ -56,21 +70,21 @@ export const generateEmbedScript = (
         transform: scale(1.05);
       }
       .chat-widget-window {
-        display: \${isInline ? 'flex' : 'none'};
+        display: \${config.isInline ? 'flex' : 'none'};
         flex-direction: column;
         background-color: white;
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        \${isInline ? \`
+        \${config.isInline ? \`
           width: 100%;
           height: 100%;
           \` : \`
           width: 350px;
           height: 500px;
           position: absolute;
-          bottom: \${positionClass.includes('bottom') ? '70px' : '0'};
-          \${positionClass.includes('right') ? 'right: 0;' : 'left: 0;'}
+          bottom: \${config.positionClass.includes('bottom') ? '70px' : '0'};
+          \${config.positionClass.includes('right') ? 'right: 0;' : 'left: 0;'}
           \`}
       }
       .chat-widget-header {
@@ -190,10 +204,10 @@ export const generateEmbedScript = (
     const threadId = 'chat_' + Math.random().toString(36).substring(2, 15);
     
     // Create different elements based on whether it's inline or fixed position
-    if (isInline) {
-      const targetElement = document.querySelector('\${targetSelector}');
+    if (config.isInline) {
+      const targetElement = document.querySelector(config.targetSelector);
       if (!targetElement) {
-        console.error('Chat widget target element not found: \${targetSelector}');
+        console.error('Chat widget target element not found: ' + config.targetSelector);
         return;
       }
       
@@ -224,12 +238,12 @@ export const generateEmbedScript = (
       header.className = 'chat-widget-header';
       
       const title = document.createElement('h3');
-      title.textContent = '\${chatTitle}';
+      title.textContent = config.chatTitle;
       
       const headerButtons = document.createElement('div');
       headerButtons.className = 'chat-widget-header-buttons';
       
-      if (!isInline) {
+      if (!config.isInline) {
         const minimizeButton = document.createElement('button');
         minimizeButton.className = 'chat-widget-icon-button';
         minimizeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
@@ -254,7 +268,7 @@ export const generateEmbedScript = (
       // Empty state
       const emptyState = document.createElement('div');
       emptyState.className = 'chat-widget-empty-state';
-      emptyState.textContent = '\${emptyStateText}';
+      emptyState.textContent = config.emptyStateText;
       messagesContainer.appendChild(emptyState);
       
       // Input container
@@ -271,7 +285,7 @@ export const generateEmbedScript = (
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'chat-widget-input';
-      input.placeholder = '\${inputPlaceholder}';
+      input.placeholder = config.inputPlaceholder;
       
       const sendButton = document.createElement('button');
       sendButton.type = 'submit';
@@ -325,7 +339,7 @@ export const generateEmbedScript = (
       chatMessages.push(messageObj);
       
       // Call webhook
-      if ('\${webhookUrl}') {
+      if (config.webhookUrl) {
         callWebhook(message);
       }
     }
@@ -352,7 +366,7 @@ export const generateEmbedScript = (
     }
     
     function callWebhook(message) {
-      fetch('\${webhookUrl}', {
+      fetch(config.webhookUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
