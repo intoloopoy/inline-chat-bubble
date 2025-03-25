@@ -26,7 +26,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     chatTitle,
     setChatTitle,
     inputPlaceholder,
-    setInputPlaceholder
+    setInputPlaceholder,
+    emptyStateText,
+    setEmptyStateText
   } = useChatContext();
 
   return (
@@ -64,6 +66,15 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                   value={inputPlaceholder}
                   onChange={(e) => setInputPlaceholder(e.target.value)}
                   placeholder="Type a message..."
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="empty-state-text">Empty State Text</Label>
+                <Input
+                  id="empty-state-text"
+                  value={emptyStateText}
+                  onChange={(e) => setEmptyStateText(e.target.value)}
+                  placeholder="Send a message to start chatting"
                 />
               </div>
               <div className="grid gap-2">
