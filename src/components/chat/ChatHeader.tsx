@@ -9,9 +9,13 @@ import { Label } from "@/components/ui/label";
 
 interface ChatHeaderProps {
   title?: string;
+  showClose?: boolean;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ title = "Chat" }) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({ 
+  title = "Chat",
+  showClose = true
+}) => {
   const { toggleChat, webhookUrl, setWebhookUrl, resetChat } = useChatContext();
 
   return (
@@ -52,14 +56,19 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ title = "Chat" }) => {
             </div>
           </PopoverContent>
         </Popover>
-        <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
-          <Minimize2 className="h-4 w-4" />
-          <span className="sr-only">Minimize</span>
-        </Button>
-        <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </Button>
+        
+        {showClose && (
+          <>
+            <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
+              <Minimize2 className="h-4 w-4" />
+              <span className="sr-only">Minimize</span>
+            </Button>
+            <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

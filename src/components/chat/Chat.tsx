@@ -11,15 +11,21 @@ import MessageInput from "./MessageInput";
 interface ChatProps {
   title?: string;
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+  isInline?: boolean;
   bubbleClassName?: string;
   containerClassName?: string;
+  width?: string;
+  height?: string;
 }
 
 const Chat: React.FC<ChatProps> = ({
   title = "Chat",
   position = "bottom-right",
+  isInline = false,
   bubbleClassName,
   containerClassName,
+  width = "100%",
+  height = "500px",
 }) => {
   const { isOpen, toggleChat } = useChatContext();
 
@@ -30,10 +36,23 @@ const Chat: React.FC<ChatProps> = ({
     "top-left": "left-4 top-4",
   };
 
+  // Inline chat container has different styling
+  const containerStyles = isInline
+    ? {
+        position: "relative",
+        width,
+        height,
+      }
+    : {
+        position: "fixed",
+        width: "350px",
+        height: "500px",
+      };
+
   return (
     <>
       {/* Chat bubble button */}
-      {!isOpen && (
+      {!isOpen && !isInline && (
         <Button
           onClick={toggleChat}
           className={cn(
@@ -47,15 +66,17 @@ const Chat: React.FC<ChatProps> = ({
       )}
 
       {/* Chat container */}
-      {isOpen && (
+      {(isOpen || isInline) && (
         <div
+          style={containerStyles as React.CSSProperties}
           className={cn(
-            "chat-container chat-glass rounded-lg w-[350px] h-[500px] md:w-[400px] md:h-[600px]",
-            positionClasses[position],
+            "chat-container chat-glass rounded-lg",
+            !isInline && "md:w-[400px] md:h-[600px]",
+            !isInline && positionClasses[position],
             containerClassName
           )}
         >
-          <ChatHeader title={title} />
+          <ChatHeader title={title} showClose={!isInline} />
           <MessagesContainer />
           <MessageInput />
         </div>
