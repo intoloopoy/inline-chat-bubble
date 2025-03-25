@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { ChatProvider } from "@/context/ChatContext";
 import Chat from "@/components/chat/Chat";
@@ -15,6 +14,8 @@ const Index = () => {
   const [webhookUrl, setWebhookUrl] = useState("");
   const [copied, setCopied] = useState(false);
   const [isInline, setIsInline] = useState(false);
+  const [chatTitle, setChatTitle] = useState("Support Chat");
+  const [inputPlaceholder, setInputPlaceholder] = useState("Type a message...");
   const [targetSelector, setTargetSelector] = useState("#chat-container");
   const [width, setWidth] = useState("100%");
   const [height, setHeight] = useState("500px");
@@ -26,7 +27,9 @@ const Index = () => {
       isInline,
       targetSelector: isInline ? targetSelector : null,
       width,
-      height
+      height,
+      chatTitle,
+      inputPlaceholder
     };
     
     const script = generateEmbedScript(webhookUrl, options);
@@ -80,7 +83,11 @@ const Index = () => {
                   </p>
                 </div>
                 
-                <ChatProvider initialWebhookUrl={webhookUrl}>
+                <ChatProvider 
+                  initialWebhookUrl={webhookUrl}
+                  initialChatTitle={chatTitle}
+                  initialInputPlaceholder={inputPlaceholder}
+                >
                   <div className="h-96 border rounded-lg relative overflow-hidden bg-muted/20">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <p className="text-muted-foreground">Your website content here</p>
@@ -123,12 +130,15 @@ const Index = () => {
                     </p>
                   </div>
                   
-                  <ChatProvider initialWebhookUrl={webhookUrl}>
+                  <ChatProvider 
+                    initialWebhookUrl={webhookUrl}
+                    initialChatTitle={chatTitle}
+                    initialInputPlaceholder={inputPlaceholder}
+                  >
                     <Chat 
                       isInline={true} 
                       width="100%" 
                       height="500px"
-                      title="Support Chat"
                     />
                   </ChatProvider>
                   
@@ -239,6 +249,25 @@ const Index = () => {
                   )}
                 </div>
                 
+                <div className="grid grid-cols-1 gap-2">
+                  <Label htmlFor="chatTitle">Chat Title</Label>
+                  <Input
+                    id="chatTitle"
+                    value={chatTitle}
+                    onChange={(e) => setChatTitle(e.target.value)}
+                    placeholder="Support Chat"
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <Label htmlFor="inputPlaceholder">Input Placeholder</Label>
+                  <Input
+                    id="inputPlaceholder"
+                    value={inputPlaceholder}
+                    onChange={(e) => setInputPlaceholder(e.target.value)}
+                    placeholder="Type a message..."
+                  />
+                </div>
+                
                 <div className="relative mt-4">
                   <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-[300px] text-sm">
                     {generateEmbedScript(webhookUrl, {
@@ -246,7 +275,9 @@ const Index = () => {
                       isInline,
                       targetSelector: isInline ? targetSelector : null,
                       width,
-                      height
+                      height,
+                      chatTitle,
+                      inputPlaceholder
                     })}
                   </pre>
                   <Button

@@ -13,6 +13,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.sender === "user";
   const messageText = processHtmlContent(message.text);
   
+  // Format timestamp using the user's locale without AM/PM
+  const formattedTime = new Date(message.timestamp).toLocaleTimeString(
+    navigator.language, 
+    { hour: '2-digit', minute: '2-digit', hour12: false }
+  );
+  
   return (
     <div
       className={cn(
@@ -38,7 +44,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             "text-xs mt-1",
             isUser ? "text-blue-100" : "text-gray-500"
           )}>
-            {format(new Date(message.timestamp), "h:mm a")}
+            {formattedTime}
           </span>
         </div>
       </div>

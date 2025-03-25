@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,10 +15,10 @@ interface ChatProps {
   containerClassName?: string;
   width?: string;
   height?: string;
+  inputPlaceholder?: string;
 }
 
 const Chat: React.FC<ChatProps> = ({
-  title = "Chat",
   position = "bottom-right",
   isInline = false,
   bubbleClassName,
@@ -27,7 +26,7 @@ const Chat: React.FC<ChatProps> = ({
   width = "100%",
   height = "500px",
 }) => {
-  const { isOpen, toggleChat } = useChatContext();
+  const { isOpen, toggleChat, chatTitle } = useChatContext();
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const positionClasses = {
@@ -95,7 +94,6 @@ const Chat: React.FC<ChatProps> = ({
           )}
         >
           <ChatHeader 
-            title={title} 
             showClose={!isInline} 
             isFullscreen={isFullscreen}
             onToggleFullscreen={toggleFullscreen}

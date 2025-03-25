@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 
 const MessageInput: React.FC = () => {
-  const { sendMessage, isLoading } = useChatContext();
+  const { sendMessage, isLoading, inputPlaceholder } = useChatContext();
   const [message, setMessage] = useState("");
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -54,7 +54,7 @@ const MessageInput: React.FC = () => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           onInput={handleInput}
-          placeholder="Type a message..."
+          placeholder={inputPlaceholder}
           className="w-full resize-none overflow-y-auto rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[40px] max-h-[120px]"
           disabled={isLoading}
           rows={1}

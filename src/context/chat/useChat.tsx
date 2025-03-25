@@ -4,11 +4,17 @@ import { clearChatStorage } from "./storage";
 import { ChatContextProps } from "./types";
 import { useMessages, useThreadId, useChatToggle, useSendMessage } from "./hooks";
 
-export const useChat = (initialWebhookUrl: string = ""): ChatContextProps => {
+export const useChat = (
+  initialWebhookUrl: string = "",
+  initialChatTitle: string = "Support Chat",
+  initialInputPlaceholder: string = "Type a message..."
+): ChatContextProps => {
   const { messages, setMessages } = useMessages();
   const { threadId, setThreadId } = useThreadId();
   const { isOpen, toggleChat } = useChatToggle();
   const [webhookUrl, setWebhookUrl] = useState(initialWebhookUrl);
+  const [chatTitle, setChatTitle] = useState(initialChatTitle);
+  const [inputPlaceholder, setInputPlaceholder] = useState(initialInputPlaceholder);
   
   const { isLoading, sendMessage } = useSendMessage(
     messages, 
@@ -30,7 +36,11 @@ export const useChat = (initialWebhookUrl: string = ""): ChatContextProps => {
     isOpen,
     isLoading,
     webhookUrl,
+    chatTitle,
+    inputPlaceholder,
     setWebhookUrl,
+    setChatTitle,
+    setInputPlaceholder,
     toggleChat,
     sendMessage,
     resetChat,

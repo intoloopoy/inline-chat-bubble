@@ -6,7 +6,11 @@ export interface ChatContextProps {
   isOpen: boolean;
   isLoading: boolean;
   webhookUrl: string;
+  chatTitle: string;
+  inputPlaceholder: string;
   setWebhookUrl: (url: string) => void;
+  setChatTitle: (title: string) => void;
+  setInputPlaceholder: (placeholder: string) => void;
   toggleChat: () => void;
   sendMessage: (text: string) => Promise<void>;
   resetChat: () => void;
@@ -15,5 +19,7 @@ export interface ChatContextProps {
 export interface ChatProviderProps {
   children: React.ReactNode;
   initialWebhookUrl?: string;
+  initialChatTitle?: string;
+  initialInputPlaceholder?: string;
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
 }

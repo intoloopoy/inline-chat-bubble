@@ -16,8 +16,10 @@ export const useChatContext = () => {
 export const ChatProvider: React.FC<ChatProviderProps> = ({
   children,
   initialWebhookUrl = "",
+  initialChatTitle = "Support Chat",
+  initialInputPlaceholder = "Type a message...",
 }) => {
-  const chatContext = useChat(initialWebhookUrl);
+  const chatContext = useChat(initialWebhookUrl, initialChatTitle, initialInputPlaceholder);
 
   return (
     <ChatContext.Provider value={chatContext}>

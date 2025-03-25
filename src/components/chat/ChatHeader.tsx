@@ -8,23 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface ChatHeaderProps {
-  title?: string;
   showClose?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({ 
-  title = "Chat",
   showClose = true,
   isFullscreen = false,
   onToggleFullscreen
 }) => {
-  const { toggleChat, webhookUrl, setWebhookUrl, resetChat } = useChatContext();
+  const { 
+    toggleChat, 
+    webhookUrl, 
+    setWebhookUrl, 
+    resetChat,
+    chatTitle,
+    setChatTitle,
+    inputPlaceholder,
+    setInputPlaceholder
+  } = useChatContext();
 
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground">
-      <h3 className="text-lg font-medium">{title}</h3>
+      <h3 className="text-lg font-medium">{chatTitle}</h3>
       <div className="flex items-center space-x-2">
         <Popover>
           <PopoverTrigger asChild>
@@ -40,6 +47,24 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
                 <p className="text-sm text-muted-foreground">
                   Configure the chat widget
                 </p>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="chat-title">Chat Title</Label>
+                <Input
+                  id="chat-title"
+                  value={chatTitle}
+                  onChange={(e) => setChatTitle(e.target.value)}
+                  placeholder="Support Chat"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="input-placeholder">Input Placeholder</Label>
+                <Input
+                  id="input-placeholder"
+                  value={inputPlaceholder}
+                  onChange={(e) => setInputPlaceholder(e.target.value)}
+                  placeholder="Type a message..."
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="webhook">Webhook URL</Label>
