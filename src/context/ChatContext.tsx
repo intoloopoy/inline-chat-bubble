@@ -102,6 +102,31 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     return Date.now(); // Final fallback
   };
 
+  // Process a single message to ensure it has the correct format
+  const processMessage = (msg: any): Message => {
+    // Create a properly formatted message
+    return {
+      id: msg.id || uuidv4(), // Ensure there's an ID
+      text: msg.text || "",
+      sender: msg.sender || "agent",
+      timestamp: normalizeTimestamp(msg.timestamp) // Normalize timestamp
+    };
+  };
+
+  // Check if a message is a duplicate
+  const isDuplicateMessage = (newMsg: Message, existingMessages: Message[]): boolean => {
+    // First check by ID
+    const idMatch = existingMessages.some(msg => msg.id === newMsg.id);
+    if (idMatch) return true;
+    
+    // Then check by content and timestamp (within a small window)
+    return existingMessages.some(msg => 
+      msg.text === newMsg.text && 
+      msg.sender === newMsg.sender &&
+      Math.abs(msg.timestamp - newMsg.timestamp) < 5000 // 5 second window
+    );
+  };
+
   // Send a message to the webhook
   const sendMessage = useCallback(
     async (text: string) => {
@@ -126,6 +151,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
       try {
         // Send the message to the webhook
+        console.log("Sending message to webhook:", webhookUrl);
         const response = await fetch(webhookUrl, {
           method: "POST",
           headers: {
@@ -143,6 +169,13 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
         // Get the response body as text first
         const responseText = await response.text();
+        console.log("Raw webhook response:", responseText);
+        
+        // If response is empty or whitespace, show error
+        if (!responseText.trim()) {
+          console.error("Empty response from webhook");
+          throw new Error("Empty response from webhook");
+        }
         
         // Try to parse the JSON
         let data: WebhookResponse;
@@ -161,24 +194,22 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
         // Update messages with the response from the webhook
         setMessages((prev) => {
-          // Process incoming messages to ensure they have the correct format
-          const processedMessages = Array.isArray(data.messages) 
-            ? data.messages.map(msg => ({
-                ...msg,
-                id: msg.id || uuidv4(), // Ensure there's an ID
-                timestamp: normalizeTimestamp(msg.timestamp) // Normalize timestamp
-              }))
-            : [];
-            
-          // Filter out any messages from the webhook that we already have
-          const newMessages = processedMessages.filter(
-            (msg) => !prev.some((prevMsg) => prevMsg.id === msg.id)
-          );
+          // Ensure messages array exists in response
+          if (!Array.isArray(data.messages) || data.messages.length === 0) {
+            console.warn("No messages in webhook response");
+            return prev;
+          }
+          
+          // Process each message from the webhook
+          const newMessages = data.messages
+            .map(processMessage)
+            .filter(newMsg => !isDuplicateMessage(newMsg, prev));
           
           if (newMessages.length === 0) {
             console.warn("No new messages received from webhook");
+            return prev;
           } else {
-            console.log("New messages added:", newMessages);
+            console.log(`Adding ${newMessages.length} new messages:`, newMessages);
           }
           
           return [...prev, ...newMessages];
