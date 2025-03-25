@@ -30,7 +30,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             <span className="text-sm">{messageText}</span>
           ) : (
             <div 
-              className="text-sm"
+              className="text-sm chat-message-content"
               dangerouslySetInnerHTML={{ __html: messageText }} 
             />
           )}

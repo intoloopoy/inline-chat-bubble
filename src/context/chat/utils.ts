@@ -1,3 +1,4 @@
+
 import { v4 as uuidv4 } from "uuid";
 import { Message } from "@/types/chat";
 
@@ -124,6 +125,13 @@ export const processHtmlContent = (text: string): string => {
     return text
       // Fix common HTML issues
       .replace(/\s+/g, " ")
+      // Ensure proper spacing for list items to render correctly
+      .replace(/<\/li>\s*<li>/g, "</li><li>")
+      // Ensure proper structure for ordered and unordered lists
+      .replace(/<ol>/g, '<ol class="list-decimal pl-5 my-2">')
+      .replace(/<ul>/g, '<ul class="list-disc pl-5 my-2">')
+      // Add proper styling for paragraphs
+      .replace(/<p>/g, '<p class="mb-2">')
       .trim();
   }
   
