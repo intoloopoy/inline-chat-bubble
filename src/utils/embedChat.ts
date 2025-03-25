@@ -1,4 +1,3 @@
-
 export const generateEmbedScript = (
   webhookUrl: string, 
   options: {
@@ -30,14 +29,14 @@ export const generateEmbedScript = (
     style.innerHTML = \`
       .chat-widget-container {
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        ${!isInline ? \`
+        \${!isInline ? \`
           position: fixed;
-          ${positionClass.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
-          ${positionClass.includes('right') ? 'right: 20px;' : 'left: 20px;'}
+          \${positionClass.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
+          \${positionClass.includes('right') ? 'right: 20px;' : 'left: 20px;'}
           z-index: 9999;
           \` : \`
-          width: ${width};
-          height: ${height};
+          width: \${width};
+          height: \${height};
           \`}
       }
       .chat-widget-button {
@@ -57,21 +56,21 @@ export const generateEmbedScript = (
         transform: scale(1.05);
       }
       .chat-widget-window {
-        display: ${isInline ? 'flex' : 'none'};
+        display: \${isInline ? 'flex' : 'none'};
         flex-direction: column;
         background-color: white;
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        ${isInline ? \`
+        \${isInline ? \`
           width: 100%;
           height: 100%;
           \` : \`
           width: 350px;
           height: 500px;
           position: absolute;
-          bottom: ${positionClass.includes('bottom') ? '70px' : '0'};
-          ${positionClass.includes('right') ? 'right: 0;' : 'left: 0;'}
+          bottom: \${positionClass.includes('bottom') ? '70px' : '0'};
+          \${positionClass.includes('right') ? 'right: 0;' : 'left: 0;'}
           \`}
       }
       .chat-widget-header {
@@ -192,9 +191,9 @@ export const generateEmbedScript = (
     
     // Create different elements based on whether it's inline or fixed position
     if (isInline) {
-      const targetElement = document.querySelector('${targetSelector}');
+      const targetElement = document.querySelector('\${targetSelector}');
       if (!targetElement) {
-        console.error('Chat widget target element not found: ${targetSelector}');
+        console.error('Chat widget target element not found: \${targetSelector}');
         return;
       }
       
@@ -225,7 +224,7 @@ export const generateEmbedScript = (
       header.className = 'chat-widget-header';
       
       const title = document.createElement('h3');
-      title.textContent = '${chatTitle}';
+      title.textContent = '\${chatTitle}';
       
       const headerButtons = document.createElement('div');
       headerButtons.className = 'chat-widget-header-buttons';
@@ -255,7 +254,7 @@ export const generateEmbedScript = (
       // Empty state
       const emptyState = document.createElement('div');
       emptyState.className = 'chat-widget-empty-state';
-      emptyState.textContent = '${emptyStateText}';
+      emptyState.textContent = '\${emptyStateText}';
       messagesContainer.appendChild(emptyState);
       
       // Input container
@@ -272,7 +271,7 @@ export const generateEmbedScript = (
       const input = document.createElement('input');
       input.type = 'text';
       input.className = 'chat-widget-input';
-      input.placeholder = '${inputPlaceholder}';
+      input.placeholder = '\${inputPlaceholder}';
       
       const sendButton = document.createElement('button');
       sendButton.type = 'submit';
@@ -326,7 +325,7 @@ export const generateEmbedScript = (
       chatMessages.push(messageObj);
       
       // Call webhook
-      if ('${webhookUrl}') {
+      if ('\${webhookUrl}') {
         callWebhook(message);
       }
     }
@@ -353,7 +352,7 @@ export const generateEmbedScript = (
     }
     
     function callWebhook(message) {
-      fetch('${webhookUrl}', {
+      fetch('\${webhookUrl}', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
