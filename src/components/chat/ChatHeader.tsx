@@ -1,0 +1,68 @@
+
+import React from "react";
+import { useChatContext } from "@/context/ChatContext";
+import { Button } from "@/components/ui/button";
+import { X, Minimize2, Settings } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+interface ChatHeaderProps {
+  title?: string;
+}
+
+const ChatHeader: React.FC<ChatHeaderProps> = ({ title = "Chat" }) => {
+  const { toggleChat, webhookUrl, setWebhookUrl, resetChat } = useChatContext();
+
+  return (
+    <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground">
+      <h3 className="text-lg font-medium">{title}</h3>
+      <div className="flex items-center space-x-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">Settings</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <h4 className="font-medium leading-none">Settings</h4>
+                <p className="text-sm text-muted-foreground">
+                  Configure the chat widget
+                </p>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="webhook">Webhook URL</Label>
+                <Input
+                  id="webhook"
+                  value={webhookUrl}
+                  onChange={(e) => setWebhookUrl(e.target.value)}
+                  placeholder="https://example.com/webhook"
+                />
+              </div>
+              <Button 
+                variant="destructive" 
+                onClick={resetChat}
+                className="w-full"
+              >
+                Clear Chat History
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+        <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
+          <Minimize2 className="h-4 w-4" />
+          <span className="sr-only">Minimize</span>
+        </Button>
+        <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default ChatHeader;
