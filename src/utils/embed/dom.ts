@@ -66,7 +66,10 @@ export const createChatWindow = (config: ChatConfig) => {
   form.className = 'chat-widget-form';
   form.addEventListener('submit', function(e) {
     e.preventDefault();
-    sendMessage();
+    // Use window.sendMessage instead of direct sendMessage call
+    if (typeof (window as any).sendMessage === 'function') {
+      (window as any).sendMessage();
+    }
   });
   
   const textarea = document.createElement('textarea');
@@ -79,7 +82,10 @@ export const createChatWindow = (config: ChatConfig) => {
   textarea.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      // Use window.sendMessage instead of direct sendMessage call
+      if (typeof (window as any).sendMessage === 'function') {
+        (window as any).sendMessage();
+      }
     }
   });
   
@@ -106,8 +112,10 @@ export const toggleChat = () => {
   const chatWindow = document.querySelector('.chat-widget-window');
   if (!chatWindow) return;
   
-  const currentDisplay = getComputedStyle(chatWindow).display;
-  chatWindow.style.display = currentDisplay === 'none' ? 'flex' : 'none';
+  // Type assertion to HTMLElement to use style property
+  const chatWindowElement = chatWindow as HTMLElement;
+  const currentDisplay = getComputedStyle(chatWindowElement).display;
+  chatWindowElement.style.display = currentDisplay === 'none' ? 'flex' : 'none';
 };
 
 /**

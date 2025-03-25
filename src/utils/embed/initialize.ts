@@ -62,13 +62,16 @@ export const initializeChatWidget = (config: ChatWidgetConfig) => {
     chatButton.addEventListener('click', () => {
       const chatWindow = document.querySelector('.chat-widget-window');
       if (chatWindow) {
-        const currentDisplay = getComputedStyle(chatWindow).display;
-        chatWindow.style.display = currentDisplay === 'none' ? 'flex' : 'none';
+        // Type assertion to HTMLElement to use style property
+        const chatWindowElement = chatWindow as HTMLElement;
+        const currentDisplay = getComputedStyle(chatWindowElement).display;
+        chatWindowElement.style.display = currentDisplay === 'none' ? 'flex' : 'none';
       }
     });
     
     const chatWindow = createChatWindow(config);
-    chatWindow.style.display = 'none';
+    // Type assertion to HTMLElement to use style property
+    (chatWindow as HTMLElement).style.display = 'none';
     
     chatWidget.appendChild(chatButton);
     chatWidget.appendChild(chatWindow);
