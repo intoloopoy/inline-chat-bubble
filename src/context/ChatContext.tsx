@@ -69,6 +69,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     localStorage.removeItem("chatMessages");
   }, []);
 
+  // Helper function to ensure timestamp is a number
+  const normalizeTimestamp = (timestamp: string | number): number => {
+    if (typeof timestamp === 'number') {
+      return timestamp;
+    }
+    
+    // Try to parse the timestamp as a Date
+    try {
+      return new Date(timestamp).getTime();
+    } catch (e) {
+      console.error("Failed to parse timestamp:", timestamp);
+      return Date.now(); // Fallback to current time if parsing fails
+    }
+  };
+
   // Send a message to the webhook
   const sendMessage = useCallback(
     async (text: string) => {
@@ -116,10 +131,20 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
 
         // Update messages with the response from the webhook
         setMessages((prev) => {
+          // Process incoming messages to ensure they have the correct format
+          const processedMessages = Array.isArray(data.messages) 
+            ? data.messages.map(msg => ({
+                ...msg,
+                id: msg.id || uuidv4(), // Ensure there's an ID
+                timestamp: normalizeTimestamp(msg.timestamp) // Normalize timestamp
+              }))
+            : [];
+            
           // Filter out any messages from the webhook that we already have
-          const newMessages = data.messages.filter(
+          const newMessages = processedMessages.filter(
             (msg) => !prev.some((prevMsg) => prevMsg.id === msg.id)
           );
+          
           return [...prev, ...newMessages];
         });
       } catch (error) {
