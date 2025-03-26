@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChatProvider } from "@/context/ChatContext";
 import Chat from "@/components/chat/Chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { generateEmbedScript } from "@/utils/embedChat";
+import { generateEmbedScript, generateIframeEmbedCode } from "@/utils/embedChat";
 import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,27 +13,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const Index = () => {
   const [webhookUrl, setWebhookUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const [embedType, setEmbedType] = useState("script");
   const [isInline, setIsInline] = useState(false);
   const [chatTitle, setChatTitle] = useState("Support Chat");
   const [inputPlaceholder, setInputPlaceholder] = useState("Type a message...");
+  const [emptyStateText, setEmptyStateText] = useState("Send a message to start chatting");
   const [targetSelector, setTargetSelector] = useState("#chat-container");
   const [width, setWidth] = useState("100%");
   const [height, setHeight] = useState("500px");
   const [position, setPosition] = useState("bottom-right");
+  const [baseUrl, setBaseUrl] = useState("");
+  
+  // Get the base URL of the application for iframe embedding
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    setBaseUrl(`${url.protocol}//${url.host}`);
+  }, []);
   
   const handleCopy = () => {
-    const options = {
-      position,
-      isInline,
-      targetSelector: isInline ? targetSelector : null,
-      width,
-      height,
-      chatTitle,
-      inputPlaceholder
-    };
+    let embedCode;
     
-    const script = generateEmbedScript(webhookUrl, options);
-    navigator.clipboard.writeText(script);
+    if (embedType === "iframe") {
+      embedCode = generateIframeEmbedCode(baseUrl, {
+        webhookUrl,
+        chatTitle,
+        inputPlaceholder,
+        emptyStateText,
+        width,
+        height,
+        instanceId: `chat_${Math.random().toString(36).substring(2, 15)}`
+      });
+    } else {
+      const options = {
+        position,
+        isInline,
+        targetSelector: isInline ? targetSelector : null,
+        width,
+        height,
+        chatTitle,
+        inputPlaceholder,
+        emptyStateText
+      };
+      
+      embedCode = generateEmbedScript(webhookUrl, options);
+    }
+    
+    navigator.clipboard.writeText(embedCode);
     setCopied(true);
     toast.success("Embed code copied to clipboard");
     
@@ -54,9 +79,10 @@ const Index = () => {
           </div>
           
           <Tabs defaultValue="demo">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="demo">Fixed Position Demo</TabsTrigger>
               <TabsTrigger value="inline">Inline Demo</TabsTrigger>
+              <TabsTrigger value="iframe">iFrame Demo</TabsTrigger>
               <TabsTrigger value="embed">Get Embed Code</TabsTrigger>
             </TabsList>
             
@@ -87,6 +113,7 @@ const Index = () => {
                   initialWebhookUrl={webhookUrl}
                   initialChatTitle={chatTitle}
                   initialInputPlaceholder={inputPlaceholder}
+                  initialEmptyStateText={emptyStateText}
                 >
                   <div className="h-96 border rounded-lg relative overflow-hidden bg-muted/20">
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -134,6 +161,7 @@ const Index = () => {
                     initialWebhookUrl={webhookUrl}
                     initialChatTitle={chatTitle}
                     initialInputPlaceholder={inputPlaceholder}
+                    initialEmptyStateText={emptyStateText}
                   >
                     <Chat 
                       isInline={true} 
@@ -149,6 +177,52 @@ const Index = () => {
                       for your users. The chat widget adapts to its container size, making it
                       fully responsive.
                     </p>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="iframe" className="p-6 rounded-lg bg-card shadow-md">
+              <div className="mb-6">
+                <h2 className="text-2xl font-semibold mb-4">Try the iFrame Demo</h2>
+                <p className="text-muted-foreground mb-4">
+                  This demo shows how the chat widget can be embedded as an iframe in your website,
+                  allowing you to create multiple isolated chat instances with different settings.
+                </p>
+              </div>
+              
+              <div className="flex flex-col space-y-6">
+                <div className="grid grid-cols-1 gap-2">
+                  <Label htmlFor="iframeWebhook">Webhook URL for demo</Label>
+                  <Input
+                    id="iframeWebhook"
+                    value={webhookUrl}
+                    onChange={(e) => setWebhookUrl(e.target.value)}
+                    placeholder="https://example.com/webhook"
+                  />
+                </div>
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="p-4 border rounded-lg bg-muted/10">
+                    <h3 className="text-lg font-medium mb-3">iFrame Chat #1</h3>
+                    <iframe
+                      src={`${baseUrl}/embed/chat?webhookUrl=${encodeURIComponent(webhookUrl)}&chatTitle=Support%20Chat%201`}
+                      width="100%"
+                      height="400px"
+                      style={{ borderRadius: "8px", border: "none" }}
+                      title="Chat Widget 1"
+                    ></iframe>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg bg-muted/10">
+                    <h3 className="text-lg font-medium mb-3">iFrame Chat #2</h3>
+                    <iframe
+                      src={`${baseUrl}/embed/chat?webhookUrl=${encodeURIComponent(webhookUrl)}&chatTitle=Support%20Chat%202&inputPlaceholder=Ask%20a%20question...`}
+                      width="100%"
+                      height="400px"
+                      style={{ borderRadius: "8px", border: "none" }}
+                      title="Chat Widget 2"
+                    ></iframe>
                   </div>
                 </div>
               </div>
@@ -176,77 +250,95 @@ const Index = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="embedType" className="mb-2 block">Embed Type</Label>
+                    <Label htmlFor="embedMethod" className="mb-2 block">Embed Method</Label>
                     <Select 
-                      value={isInline ? "inline" : "fixed"} 
-                      onValueChange={(value) => setIsInline(value === "inline")}
+                      value={embedType} 
+                      onValueChange={setEmbedType}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select embed type" />
+                        <SelectValue placeholder="Select embed method" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="fixed">Fixed Position</SelectItem>
-                        <SelectItem value="inline">Inline</SelectItem>
+                        <SelectItem value="script">JavaScript Snippet</SelectItem>
+                        <SelectItem value="iframe">iFrame Embed</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   
-                  {!isInline && (
+                  {embedType === "script" && (
                     <div>
-                      <Label htmlFor="position" className="mb-2 block">Position</Label>
+                      <Label htmlFor="embedType" className="mb-2 block">Widget Type</Label>
                       <Select 
-                        value={position} 
-                        onValueChange={setPosition}
+                        value={isInline ? "inline" : "fixed"} 
+                        onValueChange={(value) => setIsInline(value === "inline")}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select position" />
+                          <SelectValue placeholder="Select widget type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="bottom-right">Bottom Right</SelectItem>
-                          <SelectItem value="bottom-left">Bottom Left</SelectItem>
-                          <SelectItem value="top-right">Top Right</SelectItem>
-                          <SelectItem value="top-left">Top Left</SelectItem>
+                          <SelectItem value="fixed">Fixed Position</SelectItem>
+                          <SelectItem value="inline">Inline</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   )}
+                </div>
+                
+                {embedType === "script" && !isInline && (
+                  <div>
+                    <Label htmlFor="position" className="mb-2 block">Position</Label>
+                    <Select 
+                      value={position} 
+                      onValueChange={setPosition}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                        <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                        <SelectItem value="top-right">Top Right</SelectItem>
+                        <SelectItem value="top-left">Top Left</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                {embedType === "script" && isInline && (
+                  <div>
+                    <Label htmlFor="targetSelector" className="mb-2 block">Target Selector</Label>
+                    <Input
+                      id="targetSelector"
+                      value={targetSelector}
+                      onChange={(e) => setTargetSelector(e.target.value)}
+                      placeholder="#chat-container"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      CSS selector where chat will be inserted
+                    </p>
+                  </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="width" className="mb-2 block">Width</Label>
+                    <Input
+                      id="width"
+                      value={width}
+                      onChange={(e) => setWidth(e.target.value)}
+                      placeholder="100%"
+                    />
+                  </div>
                   
-                  {isInline && (
-                    <>
-                      <div>
-                        <Label htmlFor="targetSelector" className="mb-2 block">Target Selector</Label>
-                        <Input
-                          id="targetSelector"
-                          value={targetSelector}
-                          onChange={(e) => setTargetSelector(e.target.value)}
-                          placeholder="#chat-container"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          CSS selector where chat will be inserted
-                        </p>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="width" className="mb-2 block">Width</Label>
-                        <Input
-                          id="width"
-                          value={width}
-                          onChange={(e) => setWidth(e.target.value)}
-                          placeholder="100%"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="height" className="mb-2 block">Height</Label>
-                        <Input
-                          id="height"
-                          value={height}
-                          onChange={(e) => setHeight(e.target.value)}
-                          placeholder="500px"
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div>
+                    <Label htmlFor="height" className="mb-2 block">Height</Label>
+                    <Input
+                      id="height"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      placeholder="500px"
+                    />
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 gap-2">
@@ -258,6 +350,7 @@ const Index = () => {
                     placeholder="Support Chat"
                   />
                 </div>
+                
                 <div className="grid grid-cols-1 gap-2">
                   <Label htmlFor="inputPlaceholder">Input Placeholder</Label>
                   <Input
@@ -268,17 +361,38 @@ const Index = () => {
                   />
                 </div>
                 
+                <div className="grid grid-cols-1 gap-2">
+                  <Label htmlFor="emptyStateText">Empty State Text</Label>
+                  <Input
+                    id="emptyStateText"
+                    value={emptyStateText}
+                    onChange={(e) => setEmptyStateText(e.target.value)}
+                    placeholder="Send a message to start chatting"
+                  />
+                </div>
+                
                 <div className="relative mt-4">
                   <pre className="bg-muted p-4 rounded-lg overflow-auto max-h-[300px] text-sm">
-                    {generateEmbedScript(webhookUrl, {
-                      position,
-                      isInline,
-                      targetSelector: isInline ? targetSelector : null,
-                      width,
-                      height,
-                      chatTitle,
-                      inputPlaceholder
-                    })}
+                    {embedType === "iframe" 
+                      ? generateIframeEmbedCode(baseUrl, {
+                          webhookUrl,
+                          chatTitle,
+                          inputPlaceholder,
+                          emptyStateText,
+                          width,
+                          height
+                        })
+                      : generateEmbedScript(webhookUrl, {
+                          position,
+                          isInline,
+                          targetSelector: isInline ? targetSelector : null,
+                          width,
+                          height,
+                          chatTitle,
+                          inputPlaceholder,
+                          emptyStateText
+                        })
+                    }
                   </pre>
                   <Button
                     onClick={handleCopy}
@@ -295,9 +409,11 @@ const Index = () => {
                 </div>
                 
                 <p className="text-sm text-muted-foreground">
-                  {isInline 
-                    ? "This script will inject the chat widget into the specified element on your page."
-                    : "This script will load the chat widget in a fixed position on your page."}
+                  {embedType === "iframe" 
+                    ? "This iframe can be embedded in any HTML page, providing an isolated chat experience."
+                    : isInline 
+                      ? "This script will inject the chat widget into the specified element on your page."
+                      : "This script will load the chat widget in a fixed position on your page."}
                 </p>
               </div>
             </TabsContent>
