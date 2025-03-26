@@ -73,8 +73,22 @@ const EmbedChat = () => {
     // Add a class to the body for iframe-specific styles
     document.body.classList.add("iframe-embed");
     
+    // Listen for fullscreen requests from the chat component
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === "REQUEST_FULLSCREEN") {
+        // Send message to parent for fullscreen
+        window.parent.postMessage({ type: "IFRAME_REQUEST_FULLSCREEN" }, "*");
+      } else if (event.data.type === "EXIT_FULLSCREEN") {
+        // Send message to parent to exit fullscreen
+        window.parent.postMessage({ type: "IFRAME_EXIT_FULLSCREEN" }, "*");
+      }
+    };
+    
+    window.addEventListener("message", handleMessage);
+    
     return () => {
       document.body.classList.remove("iframe-embed");
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 

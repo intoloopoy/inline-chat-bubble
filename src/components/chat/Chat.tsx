@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Maximize2, Minimize2, X } from "lucide-react";
@@ -28,15 +29,27 @@ const Chat: React.FC<ChatProps> = ({
 }) => {
   const { isOpen, toggleChat, chatTitle } = useChatContext();
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const positionClasses = {
-    "bottom-right": "right-4 bottom-4",
-    "bottom-left": "left-4 bottom-4",
-    "top-right": "right-4 top-4",
-    "top-left": "left-4 top-4",
-  };
+  const [isIframe, setIsIframe] = useState(false);
+  
+  useEffect(() => {
+    // Check if we're in an iframe
+    const inIframe = window !== window.parent;
+    setIsIframe(inIframe);
+  }, []);
 
   const toggleFullscreen = () => {
+    if (isIframe) {
+      // If in iframe, use the iframe API to request fullscreen
+      if (!isFullscreen) {
+        // Send message to parent to request fullscreen
+        window.parent.postMessage({ type: "REQUEST_FULLSCREEN" }, "*");
+      } else {
+        // Send message to parent to exit fullscreen
+        window.parent.postMessage({ type: "EXIT_FULLSCREEN" }, "*");
+      }
+    }
+    
+    // Toggle the fullscreen state regardless
     setIsFullscreen(prev => !prev);
   };
 
@@ -104,6 +117,14 @@ const Chat: React.FC<ChatProps> = ({
       )}
     </>
   );
+};
+
+// Position class mapping
+const positionClasses = {
+  "bottom-right": "right-4 bottom-4",
+  "bottom-left": "left-4 bottom-4",
+  "top-right": "right-4 top-4",
+  "top-left": "left-4 top-4",
 };
 
 export default Chat;
