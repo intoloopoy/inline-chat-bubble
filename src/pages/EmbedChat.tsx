@@ -52,6 +52,7 @@ const EmbedChat = () => {
         
         // Add message to inform parent frame that the chat is ready
         window.parent.postMessage({ type: "CHAT_READY", instanceId: `chat_${chatId}` }, "*");
+        console.log("Sent CHAT_READY message to parent");
       } catch (err) {
         console.error("Error loading chat settings:", err);
         setError("Failed to load chat settings. Please try again later.");
@@ -75,11 +76,13 @@ const EmbedChat = () => {
     
     // Listen for messages from the Chat component to pass to parent window
     const handleMessage = (event: MessageEvent) => {
-      // Only forward these specific message types to the parent
+      console.log("EmbedChat received message:", event.data);
+      
+      // Forward fullscreen messages to parent
       if (event.data && (
           event.data.type === "IFRAME_REQUEST_FULLSCREEN" || 
           event.data.type === "IFRAME_EXIT_FULLSCREEN")) {
-        // Forward message to parent window
+        console.log("Forwarding message to parent:", event.data);
         window.parent.postMessage(event.data, "*");
       }
     };

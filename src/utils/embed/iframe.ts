@@ -24,10 +24,14 @@ export const generateIframeEmbedCode = (
 <script>
   // Handle fullscreen requests from the iframe
   window.addEventListener("message", function(event) {
+    console.log("Parent received message:", event.data);
+    
     const iframe = document.getElementById("chat-widget-${chatId}");
     if (!iframe) return;
 
-    if (event.data.type === "IFRAME_REQUEST_FULLSCREEN") {
+    if (event.data && event.data.type === "IFRAME_REQUEST_FULLSCREEN") {
+      console.log("Parent handling IFRAME_REQUEST_FULLSCREEN");
+      
       // Store original dimensions
       iframe.dataset.originalWidth = iframe.style.width || "${width}";
       iframe.dataset.originalHeight = iframe.style.height || "${height}";
@@ -41,7 +45,9 @@ export const generateIframeEmbedCode = (
       iframe.style.zIndex = "9999";
       iframe.style.borderRadius = "0";
     } 
-    else if (event.data.type === "IFRAME_EXIT_FULLSCREEN") {
+    else if (event.data && event.data.type === "IFRAME_EXIT_FULLSCREEN") {
+      console.log("Parent handling IFRAME_EXIT_FULLSCREEN");
+      
       // Restore original dimensions
       iframe.style.position = "";
       iframe.style.top = "";
