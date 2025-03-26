@@ -9,7 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      chat_settings: {
+        Row: {
+          chat_title: string
+          created_at: string
+          empty_state_text: string
+          height: string
+          id: string
+          input_placeholder: string
+          name: string
+          webhook_url: string
+          width: string
+        }
+        Insert: {
+          chat_title?: string
+          created_at?: string
+          empty_state_text?: string
+          height?: string
+          id?: string
+          input_placeholder?: string
+          name: string
+          webhook_url: string
+          width?: string
+        }
+        Update: {
+          chat_title?: string
+          created_at?: string
+          empty_state_text?: string
+          height?: string
+          id?: string
+          input_placeholder?: string
+          name?: string
+          webhook_url?: string
+          width?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,20 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Get environment variables from Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Check if environment variables are defined
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
-}
-
-// Create a single supabase client for the entire app, with fallback values for development
-export const supabase = createClient(
-  supabaseUrl || 'https://your-project.supabase.co',
-  supabaseAnonKey || 'your-anon-key'
-);
+// Export the configured Supabase client from the integration
+export const supabase = supabaseClient;
 
 export interface ChatSettings {
   id: string;
