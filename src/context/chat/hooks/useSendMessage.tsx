@@ -46,11 +46,23 @@ export const useSendMessage = (
         const userId = urlParams.get('user_id');
         const moduleId = urlParams.get('module_id');
         
+        // Get parent page URL if in an iframe, otherwise use current URL
+        let pageUrl = window.location.href;
+        try {
+          if (window.parent !== window) {
+            // We're in an iframe
+            pageUrl = document.referrer || window.parent.location.href;
+          }
+        } catch (e) {
+          // If we can't access parent due to cross-origin restrictions, fallback to referrer
+          pageUrl = document.referrer || window.location.href;
+        }
+        
         // Create the request payload
         const payload: Record<string, any> = {
           message: text,
           chat_title: chatTitle,
-          page_url: window.location.href, // Add the current page URL
+          page_url: pageUrl, // Use parent page URL when embedded
           ...(threadId && { thread_id: threadId }),
           ...(userId && { user_id: userId }),
           ...(moduleId && { module_id: moduleId }),

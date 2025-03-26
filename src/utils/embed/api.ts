@@ -42,13 +42,25 @@ export const callWebhook = (
   const userId = urlParams.get('user_id');
   const moduleId = urlParams.get('module_id');
   
+  // Get parent page URL if in an iframe, otherwise use current URL
+  let pageUrl = window.location.href;
+  try {
+    if (window.parent !== window) {
+      // We're in an iframe
+      pageUrl = document.referrer || window.parent.location.href;
+    }
+  } catch (e) {
+    // If we can't access parent due to cross-origin restrictions, fallback to referrer
+    pageUrl = document.referrer || window.location.href;
+  }
+  
   // Create payload with chat title, URL parameters, and page URL
   const payload: Record<string, any> = {
     message: message,
     messages: chatMessages,
     threadId: threadId,
     chat_title: chatTitle,
-    page_url: window.location.href // Add the current page URL
+    page_url: pageUrl // Use parent page URL when embedded
   };
   
   // Add URL parameters if present
