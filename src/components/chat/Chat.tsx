@@ -35,28 +35,21 @@ const Chat: React.FC<ChatProps> = ({
     // Check if we're in an iframe
     const inIframe = window !== window.parent;
     setIsIframe(inIframe);
-    
-    // Debug log to confirm iframe detection
-    console.log("Is in iframe:", inIframe);
   }, []);
 
   const toggleFullscreen = () => {
-    console.log("Toggle fullscreen called, isIframe:", isIframe, "isFullscreen:", isFullscreen);
-    
     if (isIframe) {
       try {
         // If in iframe, communicate with parent window
         if (!isFullscreen) {
           // Request fullscreen from parent
-          console.log("Sending IFRAME_REQUEST_FULLSCREEN message to parent");
           window.parent.postMessage({ type: "IFRAME_REQUEST_FULLSCREEN" }, "*");
         } else {
           // Exit fullscreen
-          console.log("Sending IFRAME_EXIT_FULLSCREEN message to parent");
           window.parent.postMessage({ type: "IFRAME_EXIT_FULLSCREEN" }, "*");
         }
       } catch (error) {
-        console.error("Error sending postMessage:", error);
+        // Silent fail if postMessage is not available
       }
     }
     
