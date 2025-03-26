@@ -15,6 +15,7 @@ export interface ChatSettings {
   width: string;
   height: string;
   primary_color: string;
+  typing_text: string;
   created_at: string;
 }
 

@@ -8,7 +8,8 @@ export const useChat = (
   initialWebhookUrl: string = "",
   initialChatTitle: string = "Support Chat",
   initialInputPlaceholder: string = "Type a message...",
-  initialEmptyStateText: string = "Send a message to start chatting"
+  initialEmptyStateText: string = "Send a message to start chatting",
+  initialTypingText: string = "Typing..."
 ): ChatContextProps => {
   const { messages, setMessages } = useMessages();
   const { threadId, setThreadId } = useThreadId();
@@ -17,6 +18,7 @@ export const useChat = (
   const [chatTitle, setChatTitle] = useState(initialChatTitle);
   const [inputPlaceholder, setInputPlaceholder] = useState(initialInputPlaceholder);
   const [emptyStateText, setEmptyStateText] = useState(initialEmptyStateText);
+  const [typingText, setTypingText] = useState(initialTypingText);
   
   const { isLoading, sendMessage } = useSendMessage(
     messages, 
@@ -42,10 +44,12 @@ export const useChat = (
     chatTitle,
     inputPlaceholder,
     emptyStateText,
+    typingText,
     setWebhookUrl,
     setChatTitle,
     setInputPlaceholder,
     setEmptyStateText,
+    setTypingText,
     toggleChat,
     sendMessage,
     resetChat,

@@ -30,6 +30,7 @@ const ChatSettingsForm: React.FC = () => {
     width: "100%",
     height: "500px",
     primary_color: "#2563eb", // Default blue
+    typing_text: "Typing...", // Default typing text
   });
 
   useEffect(() => {
@@ -49,6 +50,7 @@ const ChatSettingsForm: React.FC = () => {
             width: settings.width,
             height: settings.height,
             primary_color: settings.primary_color || "#2563eb", // Use default blue if not set
+            typing_text: settings.typing_text || "Typing...", // Use default typing text if not set
           });
           
           // Generate embed code for existing chat
@@ -212,6 +214,7 @@ const ChatSettingsForm: React.FC = () => {
             <CardTitle>Chat Configuration</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            
             <div className="space-y-2">
               <Label htmlFor="name">Chat Name (Admin Only)</Label>
               <Input
@@ -334,6 +337,20 @@ const ChatSettingsForm: React.FC = () => {
               />
               <p className="text-sm text-muted-foreground">
                 Text shown when the chat is empty
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="typing_text">Typing Indicator Text</Label>
+              <Input
+                id="typing_text"
+                name="typing_text"
+                value={formData.typing_text}
+                onChange={handleChange}
+                placeholder="Typing..."
+              />
+              <p className="text-sm text-muted-foreground">
+                Text shown while waiting for a response
               </p>
             </div>
           </CardContent>
