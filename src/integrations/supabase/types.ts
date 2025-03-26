@@ -19,6 +19,7 @@ export type Database = {
           input_placeholder: string
           name: string
           primary_color: string | null
+          typing_text: string | null
           webhook_url: string
           width: string
         }
@@ -31,6 +32,7 @@ export type Database = {
           input_placeholder?: string
           name: string
           primary_color?: string | null
+          typing_text?: string | null
           webhook_url: string
           width?: string
         }
@@ -43,6 +45,7 @@ export type Database = {
           input_placeholder?: string
           name?: string
           primary_color?: string | null
+          typing_text?: string | null
           webhook_url?: string
           width?: string
         }
