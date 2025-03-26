@@ -37,7 +37,11 @@ export const getChatSettings = async (id: string | null | undefined): Promise<Ch
     return null;
   }
   
-  return data;
+  // Add the typing_text field with a default value if it doesn't exist in the database
+  return {
+    ...data,
+    typing_text: data.typing_text || "Typing..." // Provide default value if not present
+  };
 };
 
 export const getAllChatSettings = async (): Promise<ChatSettings[]> => {
@@ -51,7 +55,11 @@ export const getAllChatSettings = async (): Promise<ChatSettings[]> => {
     return [];
   }
   
-  return data || [];
+  // Add the typing_text field with a default value if it doesn't exist in the database
+  return (data || []).map(chatSetting => ({
+    ...chatSetting,
+    typing_text: chatSetting.typing_text || "Typing..." // Provide default value if not present
+  }));
 };
 
 export const createChatSettings = async (settings: Omit<ChatSettings, 'id' | 'created_at'>): Promise<string | null> => {
