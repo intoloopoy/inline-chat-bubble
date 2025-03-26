@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const MessagesContainer: React.FC = () => {
-  const { messages, isLoading, emptyStateText, typingText = "Typing..." } = useChatContext();
+  const { messages, isLoading, emptyStateText, typingText } = useChatContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to the bottom whenever messages change

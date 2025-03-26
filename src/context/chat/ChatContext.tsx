@@ -20,6 +20,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   initialInputPlaceholder = "Type a message...",
   initialEmptyStateText = "Send a message to start chatting",
   initialTypingText = "Typing...",
+  position = "bottom-right",
 }) => {
   const chatContext = useChat(
     initialWebhookUrl,
