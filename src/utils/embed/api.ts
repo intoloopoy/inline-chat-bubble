@@ -9,6 +9,7 @@ export const callWebhook = (
   webhookUrl: string,
   chatMessages: any[],
   threadId: string,
+  chatTitle: string,
   callbacks: {
     onStart: () => void;
     onSuccess: (messages: any[]) => void;
@@ -36,16 +37,29 @@ export const callWebhook = (
     }
   }, 30000); // 30-second timeout
   
+  // Extract URL parameters if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('user_id');
+  const moduleId = urlParams.get('module_id');
+  
+  // Create payload with chat title and URL parameters
+  const payload: Record<string, any> = {
+    message: message,
+    messages: chatMessages,
+    threadId: threadId,
+    chat_title: chatTitle
+  };
+  
+  // Add URL parameters if present
+  if (userId) payload.user_id = userId;
+  if (moduleId) payload.module_id = moduleId;
+  
   fetch(webhookUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      message: message,
-      messages: chatMessages,
-      threadId: threadId
-    }),
+    body: JSON.stringify(payload),
   })
   .then(response => {
     clearTimeout(timeoutId);

@@ -13,7 +13,8 @@ export const useSendMessage = (
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   webhookUrl: string,
   threadId: string | undefined,
-  setThreadId: React.Dispatch<React.SetStateAction<string | undefined>>
+  setThreadId: React.Dispatch<React.SetStateAction<string | undefined>>,
+  chatTitle: string
 ) => {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,10 +41,18 @@ export const useSendMessage = (
       setIsLoading(true);
 
       try {
-        // Create the request payload with only the current message and thread_id if available
-        const payload = {
+        // Extract URL parameters from iframe if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id');
+        const moduleId = urlParams.get('module_id');
+        
+        // Create the request payload
+        const payload: Record<string, any> = {
           message: text,
-          ...(threadId && { thread_id: threadId }) // Add thread_id if it exists
+          chat_title: chatTitle,
+          ...(threadId && { thread_id: threadId }),
+          ...(userId && { user_id: userId }),
+          ...(moduleId && { module_id: moduleId }),
         };
         
         console.log("Sending message to webhook:", webhookUrl);
@@ -147,7 +156,7 @@ export const useSendMessage = (
         setIsLoading(false);
       }
     },
-    [webhookUrl, threadId, setMessages, setThreadId]
+    [webhookUrl, threadId, setMessages, setThreadId, chatTitle]
   );
 
   return {

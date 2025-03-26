@@ -123,6 +123,7 @@ export const initializeChatWidget = (config: ChatWidgetConfig) => {
         config.webhookUrl, 
         chatMessages, 
         threadId,
+        config.chatTitle,
         {
           onStart: () => {
             setLoadingState(true);

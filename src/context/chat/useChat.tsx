@@ -23,7 +23,8 @@ export const useChat = (
     setMessages, 
     webhookUrl, 
     threadId, 
-    setThreadId
+    setThreadId,
+    chatTitle
   );
 
   // Reset the chat messages and thread ID
