@@ -42,12 +42,13 @@ export const callWebhook = (
   const userId = urlParams.get('user_id');
   const moduleId = urlParams.get('module_id');
   
-  // Create payload with chat title and URL parameters
+  // Create payload with chat title, URL parameters, and page URL
   const payload: Record<string, any> = {
     message: message,
     messages: chatMessages,
     threadId: threadId,
-    chat_title: chatTitle
+    chat_title: chatTitle,
+    page_url: window.location.href // Add the current page URL
   };
   
   // Add URL parameters if present

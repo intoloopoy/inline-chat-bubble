@@ -50,6 +50,7 @@ export const useSendMessage = (
         const payload: Record<string, any> = {
           message: text,
           chat_title: chatTitle,
+          page_url: window.location.href, // Add the current page URL
           ...(threadId && { thread_id: threadId }),
           ...(userId && { user_id: userId }),
           ...(moduleId && { module_id: moduleId }),
