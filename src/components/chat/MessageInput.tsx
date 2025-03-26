@@ -63,7 +63,8 @@ const MessageInput: React.FC = () => {
       <Button
         type="submit"
         size="icon"
-        className="h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
+        className="h-10 w-10 rounded-full text-primary-foreground hover:opacity-90 transition-all custom-primary-button"
+        style={{ backgroundColor: "var(--chat-primary-color, hsl(var(--primary)))" }}
         disabled={!message.trim() || isLoading}
       >
         <Send className="h-5 w-5" />
