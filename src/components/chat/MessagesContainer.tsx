@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useChatContext } from "@/context/ChatContext";
 import MessageBubble from "./MessageBubble";
 import { Loader2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const MessagesContainer: React.FC = () => {
   const { messages, isLoading, emptyStateText } = useChatContext();
@@ -14,11 +15,17 @@ const MessagesContainer: React.FC = () => {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Use scrollIntoView with a block: "end" setting to prevent page scrolling
+    messagesEndRef.current?.scrollIntoView({ 
+      behavior: "smooth", 
+      block: "end",
+      inline: "nearest"
+    });
   };
 
+  // Use ScrollArea to contain scrolling within the component
   return (
-    <div className="flex-1 overflow-y-auto p-4 bg-muted/20">
+    <ScrollArea className="flex-1 p-4 bg-muted/20">
       {messages.length === 0 ? (
         <div className="flex h-full items-center justify-center text-muted-foreground">
           <p>{emptyStateText}</p>
@@ -39,7 +46,7 @@ const MessagesContainer: React.FC = () => {
           <div ref={messagesEndRef} />
         </>
       )}
-    </div>
+    </ScrollArea>
   );
 };
 
