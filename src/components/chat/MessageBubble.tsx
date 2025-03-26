@@ -28,10 +28,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     >
       <div
         className={cn(
-          isUser ? "chat-user-bubble" : "chat-bubble",
-          !isUser && "primary-agent-bubble" // Added class for agent bubbles
+          isUser ? "chat-user-bubble" : "chat-bubble"
         )}
-        style={!isUser ? { 
+        style={isUser ? { 
           backgroundColor: "var(--chat-primary-color, hsl(var(--primary)))",
           color: "white"
         } : undefined}
@@ -47,7 +46,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           )}
           <span className={cn(
             "text-xs mt-1",
-            isUser ? "text-blue-100" : "text-white/70" // Updated for better contrast
+            isUser ? "text-white/70" : "text-gray-500" // Updated for better contrast
           )}>
             {formattedTime}
           </span>
