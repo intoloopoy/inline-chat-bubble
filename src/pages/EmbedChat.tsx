@@ -17,7 +17,7 @@ const EmbedChat = () => {
     emptyStateText: "Send a message to start chatting",
     typingText: "Typing...",
     primaryColor: "#2563eb", // Default blue color
-    instanceId: `chat_${Math.random().toString(36).substring(2, 15)}`
+    instanceId: ""
   });
 
   useEffect(() => {

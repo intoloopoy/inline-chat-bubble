@@ -1,15 +1,28 @@
 
 import { Message } from "@/types/chat";
 
-// Local storage keys
-const MESSAGES_STORAGE_KEY = "chatMessages";
-const THREAD_ID_STORAGE_KEY = "chatThreadId";
+// Base storage keys
+const BASE_MESSAGES_STORAGE_KEY = "chatMessages";
+const BASE_THREAD_ID_STORAGE_KEY = "chatThreadId";
 
 /**
- * Load messages from localStorage
+ * Get chat-specific storage key
+ */
+const getChatStorageKey = (baseKey: string): string => {
+  // Check if we're in an embedded chat and extract the chat ID from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const chatId = urlParams.get('id');
+  
+  // If chatId exists, use it to create a unique storage key
+  return chatId ? `${baseKey}_${chatId}` : baseKey;
+};
+
+/**
+ * Load messages from localStorage for the specific chat
  */
 export const loadMessagesFromStorage = (): Message[] => {
-  const storedMessages = localStorage.getItem(MESSAGES_STORAGE_KEY);
+  const storageKey = getChatStorageKey(BASE_MESSAGES_STORAGE_KEY);
+  const storedMessages = localStorage.getItem(storageKey);
   
   if (storedMessages) {
     try {
@@ -23,32 +36,40 @@ export const loadMessagesFromStorage = (): Message[] => {
 };
 
 /**
- * Save messages to localStorage
+ * Save messages to localStorage for the specific chat
  */
 export const saveMessagesToStorage = (messages: Message[]): void => {
-  localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+  const storageKey = getChatStorageKey(BASE_MESSAGES_STORAGE_KEY);
+  localStorage.setItem(storageKey, JSON.stringify(messages));
 };
 
 /**
- * Load thread ID from localStorage
+ * Load thread ID from localStorage for the specific chat
  */
 export const loadThreadIdFromStorage = (): string | undefined => {
-  return localStorage.getItem(THREAD_ID_STORAGE_KEY) || undefined;
+  const storageKey = getChatStorageKey(BASE_THREAD_ID_STORAGE_KEY);
+  return localStorage.getItem(storageKey) || undefined;
 };
 
 /**
- * Save thread ID to localStorage
+ * Save thread ID to localStorage for the specific chat
  */
 export const saveThreadIdToStorage = (threadId: string | undefined): void => {
+  const storageKey = getChatStorageKey(BASE_THREAD_ID_STORAGE_KEY);
   if (threadId) {
-    localStorage.setItem(THREAD_ID_STORAGE_KEY, threadId);
+    localStorage.setItem(storageKey, threadId);
+  } else {
+    localStorage.removeItem(storageKey);
   }
 };
 
 /**
- * Clear chat storage
+ * Clear chat storage for the specific chat
  */
 export const clearChatStorage = (): void => {
-  localStorage.removeItem(MESSAGES_STORAGE_KEY);
-  localStorage.removeItem(THREAD_ID_STORAGE_KEY);
+  const messagesKey = getChatStorageKey(BASE_MESSAGES_STORAGE_KEY);
+  const threadIdKey = getChatStorageKey(BASE_THREAD_ID_STORAGE_KEY);
+  
+  localStorage.removeItem(messagesKey);
+  localStorage.removeItem(threadIdKey);
 };
