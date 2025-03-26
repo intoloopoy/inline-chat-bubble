@@ -26,7 +26,7 @@ const EmbedChat = () => {
       const chatId = searchParams.get("id");
       
       if (!chatId) {
-        setError("Chat ID is required");
+        setError("Chat ID is required. Please provide an ID in the URL parameters.");
         setLoading(false);
         return;
       }
@@ -36,7 +36,7 @@ const EmbedChat = () => {
         const settings = await getChatSettings(chatId);
         
         if (!settings) {
-          setError("Chat settings not found");
+          setError(`Chat settings with ID "${chatId}" not found. Please check the ID and try again.`);
           setLoading(false);
           return;
         }
@@ -54,7 +54,7 @@ const EmbedChat = () => {
         window.parent.postMessage({ type: "CHAT_READY", instanceId: `chat_${chatId}` }, "*");
       } catch (err) {
         console.error("Error loading chat settings:", err);
-        setError("Failed to load chat settings");
+        setError("Failed to load chat settings. Please try again later.");
       } finally {
         setLoading(false);
       }

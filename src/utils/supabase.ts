@@ -17,7 +17,13 @@ export interface ChatSettings {
   created_at: string;
 }
 
-export const getChatSettings = async (id: string): Promise<ChatSettings | null> => {
+export const getChatSettings = async (id: string | null | undefined): Promise<ChatSettings | null> => {
+  // Check if the ID is valid before making the request
+  if (!id) {
+    console.error('Invalid chat settings ID:', id);
+    return null;
+  }
+  
   const { data, error } = await supabase
     .from('chat_settings')
     .select('*')

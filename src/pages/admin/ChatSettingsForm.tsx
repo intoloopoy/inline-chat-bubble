@@ -14,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const ChatSettingsForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const isEditMode = id !== 'new';
+  const isEditMode = Boolean(id) && id !== 'new';
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -34,7 +34,7 @@ const ChatSettingsForm: React.FC = () => {
 
   useEffect(() => {
     const loadChatSettings = async () => {
-      if (!isEditMode) return;
+      if (!isEditMode || !id) return;
       
       setLoading(true);
       try {
@@ -57,7 +57,7 @@ const ChatSettingsForm: React.FC = () => {
         } else {
           toast({
             title: "Error",
-            description: "Chat settings not found",
+            description: "Chat settings not found. The ID may be invalid.",
             variant: "destructive",
           });
           navigate("/admin/chats");
