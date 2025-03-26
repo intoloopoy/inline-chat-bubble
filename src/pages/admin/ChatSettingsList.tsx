@@ -24,10 +24,10 @@ const ChatSettingsList: React.FC = () => {
     fetchChatSettings();
   }, []);
 
-  const copyEmbedCode = (chatId: string, width: string, height: string) => {
+  const copyEmbedCode = (chatId: string, width: string, height: string, primaryColor: string) => {
     // Get the base URL without any path
     const url = window.location.origin;
-    const embedCode = generateIframeEmbedCode(url, chatId, width, height);
+    const embedCode = generateIframeEmbedCode(url, chatId, width, height, primaryColor);
     
     navigator.clipboard.writeText(embedCode)
       .then(() => {
@@ -69,7 +69,15 @@ const ChatSettingsList: React.FC = () => {
           {chatSettings.map((chat) => (
             <Card key={chat.id}>
               <CardHeader>
-                <CardTitle>{chat.name}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  {chat.name}
+                  {chat.primary_color && (
+                    <div 
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: chat.primary_color || "#2563eb" }}
+                    ></div>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
@@ -81,6 +89,14 @@ const ChatSettingsList: React.FC = () => {
                   </div>
                   <div>
                     <span className="font-medium">Size:</span> {chat.width} × {chat.height}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Color:</span> 
+                    <code className="bg-muted px-1 rounded text-xs">{chat.primary_color || "#2563eb"}</code>
+                    <div 
+                      className="h-4 w-4 rounded-full" 
+                      style={{ backgroundColor: chat.primary_color || "#2563eb" }}
+                    ></div>
                   </div>
                 </div>
               </CardContent>
@@ -95,7 +111,7 @@ const ChatSettingsList: React.FC = () => {
                   <Button 
                     variant="secondary" 
                     className="flex-1"
-                    onClick={() => copyEmbedCode(chat.id, chat.width, chat.height)}
+                    onClick={() => copyEmbedCode(chat.id, chat.width, chat.height, chat.primary_color || "#2563eb")}
                   >
                     <Copy className="h-4 w-4 mr-2" />
                     Copy Embed

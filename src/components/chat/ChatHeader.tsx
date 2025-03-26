@@ -1,54 +1,54 @@
 
 import React from "react";
-import { useChatContext } from "@/context/ChatContext";
-import { Button } from "@/components/ui/button";
 import { X, Minimize2, Maximize2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useChatContext } from "@/context/ChatContext";
 
 interface ChatHeaderProps {
   showClose?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
-  isInline?: boolean;
+  primaryColor?: string;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({ 
+const ChatHeader: React.FC<ChatHeaderProps> = ({
   showClose = true,
   isFullscreen = false,
   onToggleFullscreen,
-  isInline = false
+  primaryColor,
 }) => {
-  const { 
-    toggleChat,
-    chatTitle
-  } = useChatContext();
+  const { toggleChat, chatTitle } = useChatContext();
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground">
-      <h3 className="text-lg font-medium">{chatTitle}</h3>
-      <div className="flex items-center space-x-2">
+    <div 
+      className="flex items-center justify-between p-3 bg-primary text-primary-foreground"
+      style={primaryColor ? { backgroundColor: primaryColor } : undefined}
+    >
+      <h3 className="text-sm font-medium">{chatTitle}</h3>
+      <div className="flex items-center gap-1">
         {onToggleFullscreen && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onToggleFullscreen} 
-            className="h-8 w-8 text-primary-foreground hover:bg-primary/90"
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onToggleFullscreen}
+            className="h-7 w-7 rounded-full text-primary-foreground opacity-70 hover:opacity-100 hover:bg-white/10"
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            <span className="sr-only">{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</span>
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </Button>
         )}
-        
         {showClose && (
-          <>
-            <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
-              <Minimize2 className="h-4 w-4" />
-              <span className="sr-only">Minimize</span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={toggleChat} className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleChat}
+            className="h-7 w-7 rounded-full text-primary-foreground opacity-70 hover:opacity-100 hover:bg-white/10"
+          >
+            <X className="h-4 w-4" />
+          </Button>
         )}
       </div>
     </div>

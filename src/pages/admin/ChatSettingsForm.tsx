@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -30,6 +29,7 @@ const ChatSettingsForm: React.FC = () => {
     empty_state_text: "Send a message to start chatting",
     width: "100%",
     height: "500px",
+    primary_color: "#2563eb", // Default blue
   });
 
   useEffect(() => {
@@ -48,11 +48,18 @@ const ChatSettingsForm: React.FC = () => {
             empty_state_text: settings.empty_state_text,
             width: settings.width,
             height: settings.height,
+            primary_color: settings.primary_color || "#2563eb", // Use default blue if not set
           });
           
           // Generate embed code for existing chat
           const url = window.location.origin;
-          const code = generateIframeEmbedCode(url, settings.id, settings.width, settings.height);
+          const code = generateIframeEmbedCode(
+            url, 
+            settings.id, 
+            settings.width, 
+            settings.height,
+            settings.primary_color
+          );
           setEmbedCode(code);
         } else {
           toast({
@@ -80,6 +87,11 @@ const ChatSettingsForm: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setFormData((prev) => ({ ...prev, primary_color: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -242,6 +254,34 @@ const ChatSettingsForm: React.FC = () => {
               />
               <p className="text-sm text-muted-foreground">
                 The endpoint that will process chat messages
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="primary_color">Chat Color</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="primary_color"
+                  name="primary_color"
+                  type="color"
+                  value={formData.primary_color}
+                  onChange={handleColorChange}
+                  className="w-16 h-10 p-1 cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  value={formData.primary_color}
+                  onChange={handleColorChange}
+                  placeholder="#2563eb"
+                  className="font-mono"
+                />
+                <div 
+                  className="h-8 w-8 rounded-full"
+                  style={{ backgroundColor: formData.primary_color }}
+                ></div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Select a color for the chat header and user messages
               </p>
             </div>
             

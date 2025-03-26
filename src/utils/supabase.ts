@@ -14,6 +14,7 @@ export interface ChatSettings {
   empty_state_text: string;
   width: string;
   height: string;
+  primary_color: string;
   created_at: string;
 }
 

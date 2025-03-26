@@ -6,7 +6,8 @@ export const generateIframeEmbedCode = (
   baseUrl: string,
   chatId: string,
   width: string = "100%",
-  height: string = "500px"
+  height: string = "500px",
+  primaryColor: string = "#2563eb"
 ) => {
   // Generate the embed URL
   const embedUrl = `${baseUrl}/embed/chat?id=${encodeURIComponent(chatId)}`;

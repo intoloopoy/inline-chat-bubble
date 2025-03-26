@@ -17,6 +17,7 @@ interface ChatProps {
   width?: string;
   height?: string;
   inputPlaceholder?: string;
+  primaryColor?: string;
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -26,6 +27,7 @@ const Chat: React.FC<ChatProps> = ({
   containerClassName,
   width = "100%",
   height = "500px",
+  primaryColor,
 }) => {
   const { isOpen, toggleChat, chatTitle } = useChatContext();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -36,6 +38,13 @@ const Chat: React.FC<ChatProps> = ({
     const inIframe = window !== window.parent;
     setIsIframe(inIframe);
   }, []);
+
+  // Set custom primary color CSS variable if provided
+  useEffect(() => {
+    if (primaryColor) {
+      document.documentElement.style.setProperty('--chat-primary-color', primaryColor);
+    }
+  }, [primaryColor]);
 
   const toggleFullscreen = () => {
     if (isIframe) {
@@ -93,6 +102,7 @@ const Chat: React.FC<ChatProps> = ({
             positionClasses[position],
             bubbleClassName
           )}
+          style={primaryColor ? { backgroundColor: primaryColor } : undefined}
         >
           <MessageSquare className="h-6 w-6" />
         </Button>
@@ -114,6 +124,7 @@ const Chat: React.FC<ChatProps> = ({
             showClose={!isInline} 
             isFullscreen={isFullscreen}
             onToggleFullscreen={toggleFullscreen}
+            primaryColor={primaryColor}
           />
           <MessagesContainer />
           <MessageInput />

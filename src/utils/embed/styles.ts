@@ -1,4 +1,3 @@
-
 /**
  * Generate CSS styles for the embedded chat widget
  */
@@ -7,10 +6,13 @@ export const generateEmbedStyles = (config: {
   positionClass: string;
   width: string;
   height: string;
+  primaryColor?: string;
 }) => {
+  const primaryColor = config.primaryColor || "#2563eb"; // Default blue
+  
   return `
     :root {
-      --primary: #2563eb;
+      --primary: ${primaryColor};
       --primary-foreground: #ffffff;
       --background: #ffffff;
       --muted: #f9fafb;
@@ -18,12 +20,13 @@ export const generateEmbedStyles = (config: {
       --border: #e5e7eb;
       --chat-bubble: #e5e7eb;
       --chat-bubble-foreground: #1f2937;
-      --chat-user-bubble: #2563eb;
+      --chat-user-bubble: ${primaryColor};
       --chat-user-bubble-foreground: #ffffff;
+      --chat-primary-color: ${primaryColor};
     }
     
     .dark-mode {
-      --primary: #2563eb;
+      --primary: ${primaryColor};
       --primary-foreground: #ffffff;
       --background: #1f2937;
       --muted: #374151;
@@ -31,21 +34,21 @@ export const generateEmbedStyles = (config: {
       --border: #374151;
       --chat-bubble: #374151;
       --chat-bubble-foreground: #f9fafb;
-      --chat-user-bubble: #2563eb;
+      --chat-user-bubble: ${primaryColor};
       --chat-user-bubble-foreground: #ffffff;
     }
     
     .chat-widget-container {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      \${!config.isInline ? \`
+      ${!config.isInline ? `
         position: fixed;
-        \${config.positionClass.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
-        \${config.positionClass.includes('right') ? 'right: 20px;' : 'left: 20px;'}
+        ${config.positionClass.includes('bottom') ? 'bottom: 20px;' : 'top: 20px;'}
+        ${config.positionClass.includes('right') ? 'right: 20px;' : 'left: 20px;'}
         z-index: 9999;
-        \` : \`
-        width: \${config.width};
-        height: \${config.height};
-        \`}
+        ` : `
+        width: ${config.width};
+        height: ${config.height};
+        `}
     }
     .chat-widget-button {
       width: 56px;
@@ -64,23 +67,23 @@ export const generateEmbedStyles = (config: {
       transform: scale(1.05);
     }
     .chat-widget-window {
-      display: \${config.isInline ? 'flex' : 'none'};
+      display: ${config.isInline ? 'flex' : 'none'};
       flex-direction: column;
       background-color: var(--background);
       border-radius: 0.75rem;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       border: 1px solid var(--border);
-      \${config.isInline ? \`
+      ${config.isInline ? `
         width: 100%;
         height: 100%;
-        \` : \`
+        ` : `
         width: 350px;
         height: 500px;
         position: absolute;
-        bottom: \${config.positionClass.includes('bottom') ? '70px' : '0'};
-        \${config.positionClass.includes('right') ? 'right: 0;' : 'left: 0;'}
-        \`}
+        bottom: ${config.positionClass.includes('bottom') ? '70px' : '0'};
+        ${config.positionClass.includes('right') ? 'right: 0;' : 'left: 0;'}
+        `}
     }
     .chat-widget-header {
       display: flex;
