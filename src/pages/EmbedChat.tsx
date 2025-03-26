@@ -73,14 +73,14 @@ const EmbedChat = () => {
     // Add a class to the body for iframe-specific styles
     document.body.classList.add("iframe-embed");
     
-    // Listen for fullscreen requests from the chat component
+    // Listen for messages from the Chat component to pass to parent window
     const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === "REQUEST_FULLSCREEN") {
-        // Send message to parent for fullscreen
-        window.parent.postMessage({ type: "IFRAME_REQUEST_FULLSCREEN" }, "*");
-      } else if (event.data.type === "EXIT_FULLSCREEN") {
-        // Send message to parent to exit fullscreen
-        window.parent.postMessage({ type: "IFRAME_EXIT_FULLSCREEN" }, "*");
+      // Only forward these specific message types to the parent
+      if (event.data && (
+          event.data.type === "IFRAME_REQUEST_FULLSCREEN" || 
+          event.data.type === "IFRAME_EXIT_FULLSCREEN")) {
+        // Forward message to parent window
+        window.parent.postMessage(event.data, "*");
       }
     };
     

@@ -39,21 +39,21 @@ const Chat: React.FC<ChatProps> = ({
 
   const toggleFullscreen = () => {
     if (isIframe) {
-      // If in iframe, use the iframe API to request fullscreen
+      // If in iframe, communicate with parent window
       if (!isFullscreen) {
-        // Send message to parent to request fullscreen
-        window.parent.postMessage({ type: "REQUEST_FULLSCREEN" }, "*");
+        // Request fullscreen from parent
+        window.parent.postMessage({ type: "IFRAME_REQUEST_FULLSCREEN" }, "*");
       } else {
-        // Send message to parent to exit fullscreen
-        window.parent.postMessage({ type: "EXIT_FULLSCREEN" }, "*");
+        // Exit fullscreen
+        window.parent.postMessage({ type: "IFRAME_EXIT_FULLSCREEN" }, "*");
       }
     }
     
-    // Toggle the fullscreen state regardless
+    // Toggle the fullscreen state
     setIsFullscreen(prev => !prev);
   };
 
-  // Calculate container styles based on mode (inline/fixed) and fullscreen state
+  // Calculate container styles based on mode and fullscreen state
   const containerStyles = isFullscreen
     ? {
         position: "fixed",

@@ -29,8 +29,8 @@ export const generateIframeEmbedCode = (
 
     if (event.data.type === "IFRAME_REQUEST_FULLSCREEN") {
       // Store original dimensions
-      iframe.dataset.originalWidth = iframe.style.width;
-      iframe.dataset.originalHeight = iframe.style.height;
+      iframe.dataset.originalWidth = iframe.style.width || "${width}";
+      iframe.dataset.originalHeight = iframe.style.height || "${height}";
       
       // Make iframe fullscreen
       iframe.style.position = "fixed";
