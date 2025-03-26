@@ -13,6 +13,7 @@ interface ChatWidgetConfig {
   chatTitle: string;
   inputPlaceholder: string;
   emptyStateText: string;
+  typingText: string;
   webhookUrl: string;
 }
 
@@ -27,6 +28,9 @@ export const initializeChatWidget = (config: ChatWidgetConfig) => {
   let chatMessages: any[] = [];
   const threadId = 'chat_' + Math.random().toString(36).substring(2, 15);
   (window as any).__chatWidgetIsLoading = false;
+  
+  // Store config in window for access by other functions
+  (window as any).__chatWidgetConfig = config;
   
   // Detect dark mode preference
   const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;

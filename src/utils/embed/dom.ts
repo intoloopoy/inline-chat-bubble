@@ -10,6 +10,7 @@ interface ChatConfig {
   chatTitle: string;
   inputPlaceholder: string;
   emptyStateText: string;
+  typingText: string;
   webhookUrl: string;
 }
 
@@ -172,9 +173,12 @@ export const showTypingIndicator = () => {
   const messagesContainer = document.querySelector('.chat-widget-messages');
   if (!messagesContainer) return;
   
+  // Get the typingText from window if available, otherwise use default
+  const typingText = (window as any).__chatWidgetConfig?.typingText || 'Typing';
+  
   const typingIndicator = document.createElement('div');
   typingIndicator.className = 'chat-widget-typing';
-  typingIndicator.innerHTML = 'Typing<div class="chat-widget-typing-dots"><div class="chat-widget-typing-dot"></div><div class="chat-widget-typing-dot"></div><div class="chat-widget-typing-dot"></div></div>';
+  typingIndicator.innerHTML = `${typingText}<div class="chat-widget-typing-dots"><div class="chat-widget-typing-dot"></div><div class="chat-widget-typing-dot"></div><div class="chat-widget-typing-dot"></div></div>`;
   typingIndicator.id = 'typing-indicator';
   messagesContainer.appendChild(typingIndicator);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;

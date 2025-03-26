@@ -15,6 +15,7 @@ const EmbedChat = () => {
     chatTitle: "Support Chat",
     inputPlaceholder: "Type a message...",
     emptyStateText: "Send a message to start chatting",
+    typingText: "Typing...",
     primaryColor: "#2563eb", // Default blue color
     instanceId: `chat_${Math.random().toString(36).substring(2, 15)}`
   });
@@ -48,6 +49,7 @@ const EmbedChat = () => {
           chatTitle: settings.chat_title,
           inputPlaceholder: settings.input_placeholder,
           emptyStateText: settings.empty_state_text,
+          typingText: settings.typing_text || "Typing...", // Use default if null
           primaryColor: settings.primary_color || "#2563eb", // Use default blue if not set
           instanceId: `chat_${chatId}`
         });
@@ -119,6 +121,7 @@ const EmbedChat = () => {
         initialChatTitle={config.chatTitle}
         initialInputPlaceholder={config.inputPlaceholder}
         initialEmptyStateText={config.emptyStateText}
+        initialTypingText={config.typingText}
       >
         <Chat
           isInline={true}
