@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import EmbedChat from "./pages/EmbedChat";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ChatSettingsList from "./pages/admin/ChatSettingsList";
+import ChatSettingsForm from "./pages/admin/ChatSettingsForm";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +23,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/embed/chat" element={<EmbedChat />} />
+          
+          {/* Admin routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="chats" element={<ChatSettingsList />} />
+            <Route path="chats/new" element={<ChatSettingsForm />} />
+            <Route path="chats/:id" element={<ChatSettingsForm />} />
+          </Route>
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
