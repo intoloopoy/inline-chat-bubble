@@ -20,6 +20,7 @@ export type Database = {
           name: string
           primary_color: string | null
           typing_text: string | null
+          user_id: string | null
           webhook_url: string
           width: string
         }
@@ -33,6 +34,7 @@ export type Database = {
           name: string
           primary_color?: string | null
           typing_text?: string | null
+          user_id?: string | null
           webhook_url: string
           width?: string
         }
@@ -46,8 +48,30 @@ export type Database = {
           name?: string
           primary_color?: string | null
           typing_text?: string | null
+          user_id?: string | null
           webhook_url?: string
           width?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
         }
         Relationships: []
       }

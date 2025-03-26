@@ -17,6 +17,7 @@ export interface ChatSettings {
   primary_color: string;
   typing_text: string;
   created_at: string;
+  user_id?: string;
 }
 
 export const getChatSettings = async (id: string | null | undefined): Promise<ChatSettings | null> => {
@@ -45,9 +46,20 @@ export const getChatSettings = async (id: string | null | undefined): Promise<Ch
 };
 
 export const getAllChatSettings = async (): Promise<ChatSettings[]> => {
+  // Get the current user's ID from the auth session
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+  
+  // If no user is authenticated, return an empty array
+  if (!userId) {
+    return [];
+  }
+  
+  // Query only the chat settings belonging to the current user
   const { data, error } = await supabase
     .from('chat_settings')
     .select('*')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false });
   
   if (error) {
@@ -63,6 +75,18 @@ export const getAllChatSettings = async (): Promise<ChatSettings[]> => {
 };
 
 export const createChatSettings = async (settings: Omit<ChatSettings, 'id' | 'created_at'>): Promise<string | null> => {
+  // Get the current user's ID from the auth session if not provided
+  if (!settings.user_id) {
+    const { data: { session } } = await supabase.auth.getSession();
+    settings.user_id = session?.user?.id;
+    
+    // If still no user ID, return null (user must be authenticated)
+    if (!settings.user_id) {
+      console.error('Error creating chat settings: No authenticated user');
+      return null;
+    }
+  }
+  
   const { data, error } = await supabase
     .from('chat_settings')
     .insert([settings])

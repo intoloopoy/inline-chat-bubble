@@ -10,12 +10,14 @@ import { createChatSettings, getChatSettings, updateChatSettings, deleteChatSett
 import { Copy, Loader2 } from "lucide-react";
 import { generateIframeEmbedCode } from "@/utils/embedChat";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/context/auth/AuthContext";
 
 const ChatSettingsForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id) && id !== 'new';
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(isEditMode);
   const [saving, setSaving] = useState(false);
@@ -31,7 +33,14 @@ const ChatSettingsForm: React.FC = () => {
     height: "500px",
     primary_color: "#2563eb", // Default blue
     typing_text: "Typing...", // Default typing text
+    user_id: user?.id, // Set the user_id from the authenticated user
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({ ...prev, user_id: user.id }));
+    }
+  }, [user]);
 
   useEffect(() => {
     const loadChatSettings = async () => {
@@ -51,6 +60,7 @@ const ChatSettingsForm: React.FC = () => {
             height: settings.height,
             primary_color: settings.primary_color || "#2563eb", // Use default blue if not set
             typing_text: settings.typing_text || "Typing...", // Use default typing text if not set
+            user_id: settings.user_id || user?.id, // Use existing user_id or current user
           });
           
           // Generate embed code for existing chat
@@ -84,7 +94,7 @@ const ChatSettingsForm: React.FC = () => {
     };
 
     loadChatSettings();
-  }, [id, isEditMode, navigate, toast]);
+  }, [id, isEditMode, navigate, toast, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -98,6 +108,16 @@ const ChatSettingsForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "You must be logged in to save chat settings",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setSaving(true);
     
     try {
@@ -363,7 +383,7 @@ const ChatSettingsForm: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving || !user}>
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditMode ? "Update" : "Create"} Chat
             </Button>

@@ -3,18 +3,22 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAllChatSettings, ChatSettings } from "@/utils/supabase";
+import { getAllChatSettings, ChatSettings, deleteChatSettings } from "@/utils/supabase";
 import { Settings, Copy, ExternalLink, Trash2 } from "lucide-react";
 import { generateIframeEmbedCode } from "@/utils/embedChat";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth/AuthContext";
 
 const ChatSettingsList: React.FC = () => {
   const [chatSettings, setChatSettings] = useState<ChatSettings[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchChatSettings = async () => {
+      if (!user) return;
+      
       setLoading(true);
       const settings = await getAllChatSettings();
       setChatSettings(settings);
@@ -22,7 +26,7 @@ const ChatSettingsList: React.FC = () => {
     };
 
     fetchChatSettings();
-  }, []);
+  }, [user]);
 
   const copyEmbedCode = (chatId: string, width: string, height: string, primaryColor: string) => {
     // Get the base URL without any path
@@ -44,6 +48,30 @@ const ChatSettingsList: React.FC = () => {
           variant: "destructive",
         });
       });
+  };
+
+  const handleDeleteChat = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this chat? This action cannot be undone.")) {
+      try {
+        const success = await deleteChatSettings(id);
+        if (success) {
+          setChatSettings(prev => prev.filter(chat => chat.id !== id));
+          toast({
+            title: "Chat deleted",
+            description: "The chat has been deleted successfully",
+          });
+        } else {
+          throw new Error("Failed to delete chat");
+        }
+      } catch (error) {
+        console.error("Error deleting chat:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete the chat",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   return (
@@ -124,7 +152,11 @@ const ChatSettingsList: React.FC = () => {
                       Preview
                     </Link>
                   </Button>
-                  <Button variant="destructive" className="flex-1">
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1"
+                    onClick={() => handleDeleteChat(chat.id)}
+                  >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete
                   </Button>
