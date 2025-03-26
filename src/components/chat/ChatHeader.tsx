@@ -33,12 +33,15 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     setEmptyStateText
   } = useChatContext();
 
+  // Determine if we're in an iframe (embedded) by checking if window.self !== window.top
+  const isEmbedded = typeof window !== 'undefined' && window.self !== window.top;
+
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground">
       <h3 className="text-lg font-medium">{chatTitle}</h3>
       <div className="flex items-center space-x-2">
-        {/* Only show settings in non-embedded mode */}
-        {!isInline && (
+        {/* Only show settings if not embedded via iframe and not in inline mode */}
+        {!isInline && !isEmbedded && (
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-primary-foreground hover:bg-primary/90">
