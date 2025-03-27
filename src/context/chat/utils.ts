@@ -77,38 +77,75 @@ export const isDuplicateMessage = (newMsg: Message, existingMessages: Message[])
  * Parse webhook response text
  */
 export const parseWebhookResponse = (responseText: string) => {
-  // Try to pre-process the JSON string to handle HTML content properly
-  try {
-    // First, handle possible HTML content by properly escaping it
-    // Find strings that look like they contain HTML tags
-    const preparedText = responseText.replace(/("text"\s*:\s*")([^"]*?)(")/g, (match, p1, p2, p3) => {
-      // p2 is the content between quotes that might contain HTML
-      // Escape newlines and special characters within the HTML content
-      const escapedContent = p2
-        .replace(/\n/g, "\\n")
-        .replace(/\r/g, "\\r")
-        .replace(/\t/g, "\\t")
-        .replace(/\\"/g, '\\\\"'); // Properly escape already escaped quotes
-        
-      return p1 + escapedContent + p3;
-    });
+  // Try different parsing strategies in sequence
+  const parsingStrategies = [
+    // Strategy 1: Direct parsing
+    () => JSON.parse(responseText),
     
-    return JSON.parse(preparedText);
-  } catch (firstError) {
-    console.error("Failed to parse with first method, trying sanitized approach:", firstError);
+    // Strategy 2: Handle HTML content by properly escaping it
+    () => {
+      const preparedText = responseText.replace(/("text"\s*:\s*")([^"]*?)(")/g, (match, p1, p2, p3) => {
+        const escapedContent = p2
+          .replace(/\n/g, "\\n")
+          .replace(/\r/g, "\\r")
+          .replace(/\t/g, "\\t")
+          .replace(/\\"/g, '\\\\"');
+        return p1 + escapedContent + p3;
+      });
+      return JSON.parse(preparedText);
+    },
     
-    // Try second approach - sanitize the response by replacing problematic characters
-    try {
+    // Strategy 3: Replace quotes and special characters 
+    () => {
       const sanitizedText = responseText
         .replace(/[""]/g, '"') // Replace curly quotes with straight quotes
         .replace(/[\u0000-\u0019]+/g, " "); // Replace control characters with spaces
-                
       return JSON.parse(sanitizedText);
-    } catch (secondError) {
-      console.error("Failed to parse webhook response even after sanitizing:", secondError);
-      throw new Error("Invalid JSON response from webhook even after sanitizing");
+    },
+    
+    // Strategy 4: Handle newlines and line breaks
+    () => {
+      const sanitizedText = responseText
+        .replace(/[\n\r]+/g, ' ')
+        .replace(/\\n/g, '\\\\n')
+        .replace(/\\r/g, '\\\\r');
+      return JSON.parse(sanitizedText);
+    },
+    
+    // Strategy 5: Aggressive cleaning - handle all problematic cases
+    () => {
+      // Remove all whitespace between tokens, normalize quotes
+      const stripped = responseText
+        .replace(/\s+/g, ' ')
+        .replace(/([^\\])?'([^']*)'([^\\])?/g, '$1"$2"$3')
+        .trim();
+      return JSON.parse(stripped);
+    }
+  ];
+  
+  // Try each strategy in turn
+  for (let i = 0; i < parsingStrategies.length; i++) {
+    try {
+      const result = parsingStrategies[i]();
+      console.log(`Webhook response parsed with strategy ${i+1}`);
+      return result;
+    } catch (error) {
+      console.warn(`Strategy ${i+1} failed:`, error);
+      // Continue to the next strategy
     }
   }
+  
+  // If all strategies fail, create a fallback response
+  console.error("All parsing strategies failed for webhook response");
+  return {
+    status: "success",
+    messages: [{
+      id: uuidv4(),
+      text: "I received your message, but had trouble processing the response.",
+      sender: "agent",
+      timestamp: Date.now()
+    }]
+  };
 };
 
 /**

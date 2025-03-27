@@ -89,7 +89,29 @@ export const callWebhook = (
       data = JSON.parse(responseText);
     } catch (e) {
       console.error('Invalid JSON response:', responseText);
-      throw new Error('Invalid response from server');
+      // Try to handle common issues like unescaped newlines or quotes
+      try {
+        // Try to sanitize and parse the response
+        const sanitizedText = responseText
+          .replace(/[\n\r]+/g, ' ')
+          .replace(/([^\\])(["'])([\s\S]*?)\2/g, (match, p1, p2, p3) => {
+            return p1 + p2 + p3.replace(/['"]/g, '\\"') + p2;
+          });
+        data = JSON.parse(sanitizedText);
+        console.log('Sanitized JSON successfully parsed:', data);
+      } catch (sanitizeError) {
+        // If both parsing attempts fail, we'll create a simpler fallback response object
+        console.error('Failed to parse even with sanitization:', sanitizeError);
+        data = {
+          status: 'success',
+          messages: [{
+            id: 'msg_' + Date.now(),
+            text: 'I received your message, but had trouble processing the response. Please try again or contact support.',
+            sender: 'agent',
+            timestamp: Date.now()
+          }]
+        };
+      }
     }
     
     hideTypingIndicator();
@@ -98,6 +120,22 @@ export const callWebhook = (
       callbacks.onSuccess(data.messages);
     } else if (data.status === 'error') {
       throw new Error(data.error || 'Unknown error from webhook');
+    } else if (data.message) {
+      // Some webhooks might return a single message instead of messages array
+      callbacks.onSuccess([{
+        id: 'msg_' + Date.now(),
+        text: data.message,
+        sender: 'agent',
+        timestamp: Date.now()
+      }]);
+    } else {
+      // Fallback for unexpected response format
+      callbacks.onSuccess([{
+        id: 'msg_' + Date.now(),
+        text: 'Received response but couldn\'t process it correctly.',
+        sender: 'agent',
+        timestamp: Date.now()
+      }]);
     }
   })
   .catch(error => {

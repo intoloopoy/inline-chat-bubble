@@ -61,6 +61,7 @@ export const useSendMessage = (
         // Create the request payload
         const payload: Record<string, any> = {
           message: text,
+          messages: messages,  // Send all messages for context
           chat_title: chatTitle,
           page_url: pageUrl, // Use parent page URL when embedded
           ...(threadId && { thread_id: threadId }),
@@ -102,44 +103,66 @@ export const useSendMessage = (
           throw new Error("Empty response from webhook");
         }
         
-        // Parse the webhook response
-        const data: WebhookResponse = parseWebhookResponse(responseText);
+        try {
+          // Parse the webhook response
+          const data: WebhookResponse = parseWebhookResponse(responseText);
+          console.log("Webhook response parsed:", data);
 
-        if (data.status === "error") {
-          throw new Error(data.error || "Unknown error from webhook");
-        }
+          if (data.status === "error") {
+            throw new Error(data.error || "Unknown error from webhook");
+          }
 
-        console.log("Webhook response:", data);
-
-        // Update messages with the response from the webhook
-        setMessages((prev) => {
           // Ensure messages array exists in response
           if (!Array.isArray(data.messages) || data.messages.length === 0) {
-            console.warn("No messages in webhook response");
-            return prev;
+            // Handle case where no messages are returned but response is valid
+            const fallbackMessage: Message = {
+              id: uuidv4(),
+              text: "I've received your message but there was no response content.",
+              sender: "agent",
+              timestamp: Date.now(),
+            };
+            
+            setMessages(prev => [...prev, fallbackMessage]);
+            console.warn("No messages in webhook response, using fallback");
+            return;
           }
           
-          // Process each message from the webhook
-          const newMessages = data.messages
-            .map(processMessage)
-            .filter(newMsg => !isDuplicateMessage(newMsg, prev));
+          // Update messages with the response from the webhook
+          setMessages((prev) => {
+            // Process each message from the webhook
+            const newMessages = data.messages
+              .map(processMessage)
+              .filter(newMsg => !isDuplicateMessage(newMsg, prev));
+            
+            if (newMessages.length === 0) {
+              console.warn("No new messages received from webhook");
+              return prev;
+            } else {
+              console.log(`Adding ${newMessages.length} new messages:`, newMessages);
+            }
+            
+            // Check for thread_id in the new messages and update state if found
+            const firstMessageWithThreadId = newMessages.find(msg => msg.thread_id);
+            if (firstMessageWithThreadId?.thread_id && firstMessageWithThreadId.thread_id !== threadId) {
+              console.log("Found new thread_id:", firstMessageWithThreadId.thread_id);
+              setThreadId(firstMessageWithThreadId.thread_id);
+            }
+            
+            return [...prev, ...newMessages];
+          });
+        } catch (parseError) {
+          // If we can't parse the response, create a fallback message
+          console.error("Error parsing webhook response:", parseError);
           
-          if (newMessages.length === 0) {
-            console.warn("No new messages received from webhook");
-            return prev;
-          } else {
-            console.log(`Adding ${newMessages.length} new messages:`, newMessages);
-          }
+          const fallbackMessage: Message = {
+            id: uuidv4(),
+            text: "I received your message, but had trouble processing the response.",
+            sender: "agent",
+            timestamp: Date.now(),
+          };
           
-          // Check for thread_id in the new messages and update state if found
-          const firstMessageWithThreadId = newMessages.find(msg => msg.thread_id);
-          if (firstMessageWithThreadId?.thread_id && firstMessageWithThreadId.thread_id !== threadId) {
-            console.log("Found new thread_id:", firstMessageWithThreadId.thread_id);
-            setThreadId(firstMessageWithThreadId.thread_id);
-          }
-          
-          return [...prev, ...newMessages];
-        });
+          setMessages(prev => [...prev, fallbackMessage]);
+        }
       } catch (error) {
         console.error("Error sending message to webhook:", error);
         
@@ -169,7 +192,7 @@ export const useSendMessage = (
         setIsLoading(false);
       }
     },
-    [webhookUrl, threadId, setMessages, setThreadId, chatTitle]
+    [webhookUrl, threadId, setMessages, setThreadId, chatTitle, messages]
   );
 
   return {
