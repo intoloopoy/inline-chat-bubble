@@ -12,8 +12,7 @@ export const generateIframeEmbedCode = (
   // Generate the embed URL with fullscreen handling integrated into the iframe URL
   const embedUrl = `${baseUrl}/embed/chat?id=${encodeURIComponent(chatId)}`;
   
-  // Generate the iframe code without a separate script element
-  // Instead, we'll use onload attribute to attach event listener directly
+  // Generate iframe code with improved Vue-compatible event handling
   return `<iframe
   id="chat-widget-${chatId}"
   src="${embedUrl}"
@@ -22,15 +21,15 @@ export const generateIframeEmbedCode = (
   frameborder="0"
   allow="clipboard-write"
   style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);"
-  onload="(function(iframe) {
+  onload="(function() {
     // Store iframe reference
-    var chatIframe = iframe;
+    var chatIframe = document.getElementById('chat-widget-${chatId}');
     
-    // Handle fullscreen requests from the iframe
-    window.addEventListener('message', function(event) {
-      if (!chatIframe) return;
+    // Define fullscreen handlers in global scope for Vue compatibility
+    window.handleChatFullscreen = function(event) {
+      if (!chatIframe || !event.data) return;
 
-      if (event.data && event.data.type === 'IFRAME_REQUEST_FULLSCREEN') {
+      if (event.data.type === 'IFRAME_REQUEST_FULLSCREEN') {
         // Store original dimensions
         chatIframe.dataset.originalWidth = chatIframe.style.width || '${width}';
         chatIframe.dataset.originalHeight = chatIframe.style.height || '${height}';
@@ -44,7 +43,7 @@ export const generateIframeEmbedCode = (
         chatIframe.style.zIndex = '9999';
         chatIframe.style.borderRadius = '0';
       } 
-      else if (event.data && event.data.type === 'IFRAME_EXIT_FULLSCREEN') {
+      else if (event.data.type === 'IFRAME_EXIT_FULLSCREEN') {
         // Restore original dimensions
         chatIframe.style.position = '';
         chatIframe.style.top = '';
@@ -54,7 +53,10 @@ export const generateIframeEmbedCode = (
         chatIframe.style.zIndex = '';
         chatIframe.style.borderRadius = '8px';
       }
-    });
-  })(this)"
+    };
+    
+    // Add event listener using named function for Vue compatibility
+    window.addEventListener('message', window.handleChatFullscreen);
+  })()"
 ></iframe>`;
 };
