@@ -58,7 +58,7 @@ const Chat: React.FC<ChatProps> = ({
           window.parent.postMessage({ type: "IFRAME_EXIT_FULLSCREEN" }, "*");
         }
       } catch (error) {
-        console.error("Error toggling fullscreen:", error);
+        // Silent fail if postMessage is not available
       }
     }
     

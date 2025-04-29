@@ -77,41 +77,23 @@ const EmbedChat = () => {
     // Add a class to the body for iframe-specific styles
     document.body.classList.add("iframe-embed");
     
-    // Enhanced message handling for Vue environments
+    // Listen for messages from the Chat component to pass to parent window
     const handleMessage = (event: MessageEvent) => {
-      // Forward fullscreen messages to parent with improved event structure
+      // Forward fullscreen messages to parent
       if (event.data && (
           event.data.type === "IFRAME_REQUEST_FULLSCREEN" || 
           event.data.type === "IFRAME_EXIT_FULLSCREEN")) {
-        try {
-          // Use a more Vue-friendly message format
-          window.parent.postMessage({
-            type: event.data.type,
-            chatId: config.instanceId,
-            timestamp: Date.now()
-          }, "*");
-          console.log(`Sent ${event.data.type} message to parent`);
-        } catch (err) {
-          console.error("Failed to send message to parent:", err);
-        }
+        window.parent.postMessage(event.data, "*");
       }
     };
     
     window.addEventListener("message", handleMessage);
     
-    // Notify Vue environment that we're ready to receive fullscreen commands
-    setTimeout(() => {
-      window.parent.postMessage({ 
-        type: "CHAT_FULLSCREEN_READY",
-        chatId: config.instanceId
-      }, "*");
-    }, 1000);
-    
     return () => {
       document.body.classList.remove("iframe-embed");
       window.removeEventListener("message", handleMessage);
     };
-  }, [config.instanceId]);
+  }, []);
 
   if (loading) {
     return (
