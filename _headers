@@ -1,1 +1,1 @@
-Permissions-Policy: fullscreen=(self "https://academy.campwire.com" "https://test.cwxdev.com")
+Permissions-Policy: fullscreen=(self "https://academy.campwire.com" "https://test.cwxdev.com" "https://intoloopltd.campwire.com/")
