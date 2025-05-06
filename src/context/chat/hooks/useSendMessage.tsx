@@ -1,4 +1,3 @@
-
 import { useCallback, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -74,7 +73,7 @@ export const useSendMessage = (
         
         // Send the message to the webhook with a timeout
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout
         
         const response = await fetch(webhookUrl, {
           method: "POST",

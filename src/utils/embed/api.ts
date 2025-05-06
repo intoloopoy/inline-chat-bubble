@@ -1,4 +1,3 @@
-
 import { hideTypingIndicator } from './dom';
 
 /**
@@ -35,7 +34,7 @@ export const callWebhook = (
       
       callbacks.onSuccess([errorMessageObj]);
     }
-  }, 30000); // 30-second timeout
+  }, 90000); // 90-second timeout
   
   // Extract URL parameters if present
   const urlParams = new URLSearchParams(window.location.search);
