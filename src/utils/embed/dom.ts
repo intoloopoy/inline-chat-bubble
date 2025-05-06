@@ -1,4 +1,3 @@
-
 import { icons } from './icons';
 
 interface ChatConfig {
@@ -80,8 +79,10 @@ export const createChatWindow = (config: ChatConfig) => {
   textarea.addEventListener('input', function() {
     autoResize(this);
   });
+  
+  // Updated to handle Ctrl+Enter or Cmd+Enter for submission instead of just Enter
   textarea.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       // Use window.sendMessage instead of direct sendMessage call
       if (typeof (window as any).sendMessage === 'function') {

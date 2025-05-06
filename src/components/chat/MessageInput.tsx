@@ -24,8 +24,11 @@ const MessageInput: React.FC = () => {
     }
   };
 
+  // Updated to no longer submit on Enter key
+  // Ctrl+Enter or Cmd+Enter will now submit the form instead
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    // Submit on Ctrl+Enter or Cmd+Enter
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       handleSubmit(e);
     }
